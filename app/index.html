@@ -225,6 +225,63 @@
   }
   .save-error{color:#c0392b; font-size:0.85rem; margin:8px 0 0;}
 
+  /* Milestone celebration: shown once per chip, on this device only. */
+  .celebrate{
+    position:fixed; inset:0; z-index:900;
+    display:flex; align-items:center; justify-content:center;
+    padding:24px; background:rgba(28,26,32,0.45);
+    animation:cel-fade 0.35s ease-out;
+  }
+  .celebrate[hidden]{display:none;}
+  .celebrate-card{
+    position:relative; overflow:hidden;
+    width:100%; max-width:340px; text-align:center;
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:20px;
+    padding:34px 24px 24px; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+    animation:cel-rise 0.45s ease-out;
+  }
+  .celebrate-card .chip-circle{
+    width:96px; height:96px; font-size:2.8rem; border-width:5px;
+    margin:0 auto 14px; animation:cel-glow 2.4s ease-in-out infinite;
+  }
+  .celebrate-eyebrow{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.12em; color:var(--teal);
+  }
+  .celebrate-title{
+    font-family:"Fraunces",Georgia,serif; font-weight:600;
+    font-size:1.7rem; margin:4px 0 10px; color:var(--ink);
+  }
+  .celebrate-msg{
+    font-family:"Fraunces",Georgia,serif; font-style:italic;
+    font-size:1.02rem; line-height:1.45; color:var(--ink); margin:0 0 22px;
+  }
+  .celebrate-close{
+    width:100%; padding:13px; border:0; border-radius:999px;
+    background:var(--accent); color:var(--accent-ink);
+    font:700 1rem "Work Sans",-apple-system,sans-serif; cursor:pointer;
+  }
+  .celebrate-note{font-size:0.75rem; color:var(--ink-soft); margin:12px 0 0;}
+  .sparkle{
+    position:absolute; top:-12px; font-size:0.9rem; pointer-events:none;
+    animation:cel-drift 3.2s ease-in forwards; opacity:0;
+  }
+  @keyframes cel-fade{from{opacity:0;}to{opacity:1;}}
+  @keyframes cel-rise{from{opacity:0; transform:translateY(18px) scale(0.97);}to{opacity:1; transform:none;}}
+  @keyframes cel-glow{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,106,77,0);}
+    50%{box-shadow:0 0 0 10px rgba(255,106,77,0.14);}
+  }
+  @keyframes cel-drift{
+    0%{opacity:0; transform:translateY(0);}
+    15%{opacity:0.9;}
+    100%{opacity:0; transform:translateY(260px) rotate(120deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .celebrate, .celebrate-card, .celebrate-card .chip-circle{animation:none;}
+    .sparkle{display:none;}
+  }
+
   /* Larger text option: everything sized in rem grows with this. */
   html.large-text{font-size:118.75%;}
   html.large-text input[type], html.large-text textarea{font-size:19px;}
@@ -379,6 +436,11 @@
       <p style="margin:4px 0 0;">Add the weekly meeting to your phone's calendar, with a reminder 15 minutes before.</p>
       <a class="btn" href="meeting.ics">Add to calendar</a>
     </div>
+    <div class="card">
+      <label>Chairing this week?</label>
+      <p style="margin:4px 0 0;">The full meeting script, in order, with this week's format.</p>
+      <p style="margin:8px 0 0;"><a href="../docs/meeting-format.html">Open the chair's format →</a></p>
+    </div>
     <a class="btn secondary" href="../index.html">Back to main site</a>
   </section>
 
@@ -437,6 +499,16 @@
   </button>
 </nav>
 
+<div class="celebrate" id="celebrate" role="dialog" aria-modal="true" aria-labelledby="celebrate-title" hidden>
+  <div class="celebrate-card">
+    <div class="chip-circle" id="celebrate-chip">🌈</div>
+    <div class="celebrate-eyebrow">A new chip</div>
+    <h2 class="celebrate-title" id="celebrate-title">30 Days</h2>
+    <p class="celebrate-msg" id="celebrate-msg"></p>
+    <button type="button" class="celebrate-close" id="celebrate-close">Thank you</button>
+    <p class="celebrate-note">Just for you. Only this device knows.</p>
+  </div>
+</div>
 <script>
   // Safari can clear saved data: private tabs lose it on close, and regular tabs
   // lose it after 7 days without a visit unless the app is on the home screen.
@@ -532,7 +604,61 @@
       }
 
       renderChipGrid(days);
+      maybeCelebrate(dateStr, earned);
     }
+
+    // Each chip is celebrated once. Seen chips are stored per recovery date,
+    // so a new date starts fresh.
+    var messages = {
+      1: 'One day at a time, and you just did one. That matters.',
+      7: 'A whole week. Every one of those days took courage.',
+      30: 'Thirty days. Look how far one day at a time can go.',
+      60: 'Sixty days. You keep showing up for yourself.',
+      90: 'Ninety days. A real foundation, built day by day.',
+      180: 'Six months. Half a year of choosing yourself.',
+      270: 'Nine months. Something new keeps growing.',
+      365: 'One year. Every single day of it counts.',
+      730: 'Two years. Thank you for staying.',
+      1095: 'Three years. Your recovery is a light for the next person.'
+    };
+    var celEl = document.getElementById('celebrate');
+    var celClose = document.getElementById('celebrate-close');
+    var celCard = celEl.querySelector('.celebrate-card');
+
+    function maybeCelebrate(dateStr, earned){
+      if(!earned.length) return;
+      var seen;
+      try{ seen = JSON.parse(localStorage.getItem('ros_celebrated') || 'null'); }catch(e){ return; }
+      if(!seen || seen.date !== dateStr) seen = {date:dateStr, days:[]};
+      var current = earned[earned.length - 1];
+      if(seen.days.indexOf(current.days) !== -1) return;
+      // Mark every earned chip, so only the newest one is ever shown.
+      seen.days = earned.map(function(m){ return m.days; });
+      try{ localStorage.setItem('ros_celebrated', JSON.stringify(seen)); }catch(e){ return; }
+      showCelebration(current);
+    }
+
+    function showCelebration(m){
+      document.getElementById('celebrate-chip').textContent = m.emoji;
+      document.getElementById('celebrate-title').textContent = m.label;
+      document.getElementById('celebrate-msg').textContent = messages[m.days] || 'Every day counts.';
+      celCard.querySelectorAll('.sparkle').forEach(function(s){ s.remove(); });
+      ['✨','🌈','✨','💛','✨','💜','✨','💙'].forEach(function(ch, i){
+        var s = document.createElement('span');
+        s.className = 'sparkle';
+        s.textContent = ch;
+        s.style.left = (8 + i * 11.5) + '%';
+        s.style.animationDelay = (i * 0.22) + 's';
+        celCard.appendChild(s);
+      });
+      celEl.hidden = false;
+      celClose.focus();
+    }
+
+    function hideCelebration(){ celEl.hidden = true; }
+    celClose.addEventListener('click', hideCelebration);
+    celEl.addEventListener('click', function(e){ if(e.target === celEl) hideCelebration(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !celEl.hidden) hideCelebration(); });
 
     try{
       var saved = localStorage.getItem('ros_clean_date');
@@ -1052,6 +1178,7 @@
     });
   }
 </script>
+
 
 <script src="../assets/ui.js"></script>
 </body>
