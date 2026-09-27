@@ -199,6 +199,19 @@
     background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
   }
   nav.tabbar svg{width:19px; height:19px;}
+
+  /* iOS Safari zooms into any field under 16px and doesn't zoom back out. */
+  input[type], textarea{font-size:16px;}
+  /* An empty date field in iOS Safari collapses to a thin blank strip without this. */
+  input[type="date"]{
+    -webkit-appearance:none; appearance:none; display:block;
+    min-height:44px; text-align:left;
+  }
+  .storage-note{
+    background:var(--card); border-radius:8px; padding:10px 12px;
+    font-size:0.85rem; margin:-8px 0 16px;
+  }
+  .save-error{color:#c0392b; font-size:0.85rem; margin:8px 0 0;}
 </style>
 </head>
 <body>
@@ -219,6 +232,7 @@
   <section class="panel active" id="panel-counter">
     <h2>Recovery counter</h2>
     <p class="lede">Private to this device — nothing here is shared with anyone.</p>
+    <p class="storage-note" data-storage-note hidden></p>
     <div class="card">
       <label for="clean-date">My recovery date</label>
       <input type="date" id="clean-date">
@@ -243,6 +257,7 @@
   <section class="panel" id="panel-checkin">
     <h2>Daily check-in</h2>
     <p class="lede">A quick, private mood and gratitude log. Only you can see this.</p>
+    <p class="storage-note" data-storage-note hidden></p>
     <div class="card">
       <label>How are you today?</label>
       <div class="mood-row" id="mood-row">
@@ -255,6 +270,7 @@
       <label for="checkin-text">One thing you're grateful for, or want to remember</label>
       <textarea id="checkin-text" placeholder="Write a few words..."></textarea>
       <button class="btn" id="save-checkin">Save entry</button>
+      <p class="save-error" id="checkin-error" hidden>Couldn't save on this device. Your words are still here, so you can copy them somewhere safe.</p>
     </div>
     <h2 style="margin-top:28px; font-size:1.1rem;">Recent entries</h2>
     <div class="card" id="entries-list"></div>
@@ -349,6 +365,23 @@
 </nav>
 
 <script>
+  // Safari can clear saved data: private tabs lose it on close, and regular tabs
+  // lose it after 7 days without a visit unless the app is on the home screen.
+  (function(){
+    var standalone = window.navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+    var canSave = true;
+    try{ localStorage.setItem('ros_test', '1'); localStorage.removeItem('ros_test'); }catch(e){ canSave = false; }
+    if(navigator.storage && navigator.storage.persist){ navigator.storage.persist().catch(function(){}); }
+    if(standalone && canSave) return;
+    var msg = canSave
+      ? 'Tip: add this app to your home screen (Share → Add to Home Screen) to keep your entries safe. In a regular browser tab, your phone may clear them after a week away, and a private tab clears them when you close it.'
+      : "This browser isn't letting the app save anything right now (private browsing can do this). What you enter here will be lost when you close the tab.";
+    document.querySelectorAll('[data-storage-note]').forEach(function(el){
+      el.textContent = msg; el.hidden = false;
+    });
+  })();
+
   (function(){
     var tabs = document.querySelectorAll('.tab-btn');
     var panels = document.querySelectorAll('.panel');
@@ -460,7 +493,7 @@
       }catch(e){ return []; }
     }
     function saveEntries(entries){
-      try{ localStorage.setItem('ros_checkins', JSON.stringify(entries)); }catch(e){}
+      try{ localStorage.setItem('ros_checkins', JSON.stringify(entries)); return true; }catch(e){ return false; }
     }
     function renderEntries(){
       var entries = loadEntries();
@@ -485,7 +518,9 @@
         mood: selectedMood,
         text: text
       });
-      saveEntries(entries);
+      var errorEl = document.getElementById('checkin-error');
+      if(!saveEntries(entries)){ errorEl.hidden = false; return; }
+      errorEl.hidden = true;
       textEl.value = '';
       selectedMood = null;
       moodRow.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('selected'); });
