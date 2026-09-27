@@ -1,19 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Community feed: anyone can read and post, nobody can edit or delete
-    // from the app. Moderators remove posts from the Firebase console.
+
+    // Google accounts allowed to remove posts. Keep in sync with
+    // MODERATORS in app/index.html.
+    function isModerator() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['rainbowofserenityslaa@gmail.com'];
+    }
+
+    function ratePath() {
+      return /databases/$(database)/documents/rate/$(request.auth.uid);
+    }
+
+    // Community feed: anyone can read. Posting needs the app's invisible
+    // anonymous sign-in, one post per device every 30 seconds, and no links.
+    // Only moderators can remove posts; nobody can edit them.
     match /feed/{postId} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['name', 'text', 'createdAt'])
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['name', 'text', 'uid', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
         && request.resource.data.name is string
         && request.resource.data.name.size() <= 30
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() <= 500
-        && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
+        && !request.resource.data.text.lower().matches('(?s).*(https?://|www[.]).*')
+        && !request.resource.data.name.lower().matches('(?s).*(https?://|www[.]).*')
+        && request.resource.data.createdAt == request.time
+        // The same write must record this post time for the device...
+        && getAfter(ratePath()).data.last == request.time
+        // ...and the device's previous post must be at least 30 seconds old.
+        && (!exists(ratePath())
+            || request.time > get(ratePath()).data.last + duration.value(30, 's'));
+      allow delete: if isModerator();
+      allow update: if false;
     }
+
+    // Each device's last post time, written alongside every post.
+    match /rate/{uid} {
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['last'])
+        && request.resource.data.last == request.time;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
