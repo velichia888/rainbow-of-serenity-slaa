@@ -309,6 +309,83 @@
     color:var(--accent);
     font-size:0.95rem;
   }
+
+  .wheel-area{
+    position:relative;
+    width:260px;
+    margin:32px auto 0;
+    padding-top:22px;
+  }
+  .wheel-pointer{
+    position:absolute;
+    top:0; left:50%;
+    transform:translateX(-50%);
+    width:0; height:0;
+    border-left:10px solid transparent;
+    border-right:10px solid transparent;
+    border-top:16px solid var(--ink);
+    z-index:2;
+  }
+  .wheel-wrap{
+    width:260px; height:260px;
+    border-radius:50%;
+    overflow:hidden;
+    border:5px solid var(--bg-raised);
+    box-shadow:0 6px 20px rgba(0,0,0,0.14);
+  }
+  .wheel{
+    width:100%; height:100%;
+    position:relative;
+    background:conic-gradient(#e5384c 0deg 60deg, #f2994a 60deg 120deg, #dfb400 120deg 180deg, #27ae60 180deg 240deg, #2f80ed 240deg 300deg, #9b51e0 300deg 360deg);
+    transform:rotate(0deg);
+    transition:transform 4s cubic-bezier(.15,.65,.15,1);
+  }
+  .wheel-label{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    display:flex;
+    justify-content:center;
+    padding-top:14px;
+    box-sizing:border-box;
+    transform:rotate(var(--angle));
+    pointer-events:none;
+  }
+  .wheel-label span{
+    display:block;
+    max-width:76px;
+    font-family:"Work Sans",sans-serif;
+    font-weight:700;
+    font-size:0.66rem;
+    line-height:1.15;
+    color:#fff;
+    text-align:center;
+    text-shadow:0 1px 2px rgba(0,0,0,0.35);
+  }
+  .spin-btn{
+    display:block;
+    margin:22px auto 0;
+    background:var(--accent);
+    color:var(--accent-ink);
+    border:none;
+    border-radius:999px;
+    padding:10px 30px;
+    font-family:"Work Sans",sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    cursor:pointer;
+  }
+  .spin-btn:hover{opacity:0.9;}
+  .spin-btn:disabled{opacity:0.5; cursor:default;}
+  .wheel-result{
+    text-align:center;
+    margin-top:14px;
+    font-family:"Fraunces",Georgia,serif;
+    font-style:italic;
+    font-size:1.1rem;
+    color:var(--ink);
+    min-height:1.4em;
+  }
 </style>
 </head>
 <body>
@@ -319,6 +396,7 @@
     <a href="#who">Who This Is For</a>
     <a href="#expect">What to Expect</a>
     <a href="#service">Service</a>
+    <a href="#wheel">Spin the Wheel</a>
     <a href="#resources">Resources</a>
     <a href="#contact">Contact</a>
   </nav>
@@ -389,12 +467,11 @@
   <section id="expect">
     <span class="eyebrow">What to Expect</span>
     <h2>Our format rotates every week</h2>
-    <p>One chairperson keeps the meeting running week to week, and every other role is filled by whoever volunteers that day. Showing up early to take a role is a good way to get more out of the meeting.</p>
+    <p>Two standing service roles keep the meeting running: a Chair and a Timer, each week. On Speaker weeks we also need a volunteer Speaker — if nobody's available, that week defaults to Open + Activity instead.</p>
     <ul class="heart-list">
-      <li>Greeter — welcomes newcomers and helps them find the link</li>
-      <li>Reader — reads the opening, format, or literature for the week</li>
+      <li>Chair — leads the meeting, reads the format, keeps things moving</li>
       <li>Timer — keeps shares within the time limit, gently</li>
-      <li>Tech host — runs the waiting room, screen share, and mute issues</li>
+      <li>Speaker — third Wednesdays only; shares their story to open the floor</li>
     </ul>
     <table class="schedule">
       <caption>Monthly rotation</caption>
@@ -415,7 +492,7 @@
         <tr>
           <td class="week">Week 3</td>
           <td>Speaker</td>
-          <td>One member shares their story start to finish, then the floor opens for sharing.</td>
+          <td>One member shares their story start to finish, then the floor opens for sharing. No speaker signed up? Defaults to Open + Activity.</td>
         </tr>
         <tr>
           <td class="week">Last week</td>
@@ -438,6 +515,27 @@
         <p><a href="https://docs.google.com/spreadsheets/d/1qj24DDP9ckdMLWsu5MiEuUwoq5fSSO5ARMEFScPqGNI/edit?usp=sharing" target="_blank" rel="noopener">Open sign-up sheet →</a></p>
       </div>
     </div>
+  </section>
+
+  <section id="wheel">
+    <span class="eyebrow">Open + Activity</span>
+    <h2>Spin the wheel for a topic</h2>
+    <p>A fun way to pick a discussion topic on open-sharing weeks — spin it live on screen share and see where it lands.</p>
+    <div class="wheel-area">
+      <div class="wheel-pointer"></div>
+      <div class="wheel-wrap">
+        <div class="wheel" id="topic-wheel">
+          <div class="wheel-label" style="--angle:30deg"><span>Chosen Family</span></div>
+          <div class="wheel-label" style="--angle:90deg"><span>Self-Care Rituals</span></div>
+          <div class="wheel-label" style="--angle:150deg"><span>Coming Out Moments</span></div>
+          <div class="wheel-label" style="--angle:210deg"><span>Boundaries in Love</span></div>
+          <div class="wheel-label" style="--angle:270deg"><span>Serenity This Week</span></div>
+          <div class="wheel-label" style="--angle:330deg"><span>Queer Joy</span></div>
+        </div>
+      </div>
+    </div>
+    <button class="spin-btn" id="spin-btn" type="button">Spin the wheel</button>
+    <p class="wheel-result" id="wheel-result" aria-live="polite"></p>
   </section>
 
   <div class="icon-divider">
@@ -553,6 +651,38 @@
         }).catch(fallback);
       } else {
         fallback();
+      }
+    });
+  })();
+
+  (function(){
+    var topics = ["Chosen Family","Self-Care Rituals","Coming Out Moments","Boundaries in Love","Serenity This Week","Queer Joy"];
+    var wheel = document.getElementById('topic-wheel');
+    var btn = document.getElementById('spin-btn');
+    var result = document.getElementById('wheel-result');
+    if(!wheel || !btn || !result) return;
+    var currentRotation = 0;
+    var sliceAngle = 360 / topics.length;
+    var pendingIndex = null;
+    btn.addEventListener('click', function(){
+      btn.disabled = true;
+      result.textContent = '';
+      var idx = Math.floor(Math.random() * topics.length);
+      pendingIndex = idx;
+      var targetCenter = idx * sliceAngle + sliceAngle / 2;
+      var desiredMod = (360 - targetCenter) % 360;
+      var currentMod = ((currentRotation % 360) + 360) % 360;
+      var delta = desiredMod - currentMod;
+      if(delta <= 0) delta += 360;
+      currentRotation += 5 * 360 + delta;
+      wheel.style.transform = 'rotate(' + currentRotation + 'deg)';
+    });
+    wheel.addEventListener('transitionend', function(e){
+      if(e.propertyName !== 'transform') return;
+      btn.disabled = false;
+      if(pendingIndex !== null){
+        result.textContent = 'Topic: ' + topics[pendingIndex];
+        pendingIndex = null;
       }
     });
   })();
