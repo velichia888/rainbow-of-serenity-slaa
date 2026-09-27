@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rainbow of Serenity</title>
+<meta name="description" content="A closed, LGBTQIA+ affirming SLAA meeting — schedule, weekly format, and recovery resources.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f3fa;
+    --bg-raised:#ffffff;
+    --ink:#211b2e;
+    --ink-soft:#5a5468;
+    --line:#ddd7e8;
+    --accent:#d9553f;
+    --accent-ink:#ffffff;
+    --teal:#177f78;
+    --card:#eeeaf6;
+    --focus:#211b2e;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#181420;
+      --bg-raised:#221c2c;
+      --ink:#f1eef6;
+      --ink-soft:#b8b0c8;
+      --line:#3a3346;
+      --accent:#ff8468;
+      --accent-ink:#211b2e;
+      --teal:#4fc2b9;
+      --card:#221c2c;
+      --focus:#f1eef6;
+      color-scheme:dark;
+    }
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Work Sans",-apple-system,sans-serif;
+    line-height:1.55;
+    padding-inline:20px;
+  }
+  a{color:var(--teal);}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--focus); outline-offset:3px;}
+
+  .wrap{max-width:760px; margin:0 auto;}
+
+  header.top{
+    position:sticky; top:0;
+    background:var(--bg); z-index:10;
+    padding-block:14px 10px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:8px;
+  }
+  nav.top-nav{
+    display:flex; flex-wrap:wrap; gap:6px 16px;
+    font-size:0.85rem; font-weight:600;
+    max-width:760px; margin:0 auto;
+  }
+  nav.top-nav a{color:var(--ink-soft); text-decoration:none;}
+  nav.top-nav a:hover{color:var(--accent);}
+
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+    font-size:0.7rem;
+    color:var(--teal);
+    font-weight:600;
+  }
+
+  h1{
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:600;
+    font-size:clamp(2.1rem,7vw,3.1rem);
+    line-height:1.05;
+    margin:10px 0 6px;
+    text-wrap:balance;
+  }
+  h2{
+    font-family:"Fraunces",Georgia,serif;
+    font-weight:600;
+    font-size:clamp(1.4rem,4.5vw,1.8rem);
+    margin:0 0 14px;
+    text-wrap:balance;
+  }
+  p{max-width:65ch;}
+  section{padding-block:38px; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+
+  .lede{font-size:1.05rem; color:var(--ink-soft); max-width:56ch;}
+
+  .placeholder{
+    background:var(--card);
+    border:1px dashed var(--line);
+    border-radius:6px;
+    padding:1px 7px;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.9em;
+    color:var(--ink-soft);
+  }
+
+  .callout{
+    background:var(--card);
+    border-left:3px solid var(--accent);
+    border-radius:4px;
+    padding:18px 20px;
+    margin-block:18px;
+  }
+  .callout p{margin:0; max-width:62ch;}
+  .callout p + p{margin-top:10px;}
+
+  .basics-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:16px;
+    margin-top:20px;
+  }
+  .basics-card{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+  }
+  .basics-card .eyebrow{display:block; margin-bottom:8px;}
+  .basics-card strong{font-size:1.05rem; display:block; margin-bottom:2px;}
+
+  table.schedule{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:18px;
+    font-size:0.95rem;
+  }
+  table.schedule caption{
+    text-align:left;
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.7rem;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  table.schedule th, table.schedule td{
+    text-align:left;
+    padding:12px 10px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  table.schedule th{
+    font-family:"IBM Plex Mono",monospace;
+    font-size:0.75rem;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    font-weight:600;
+    white-space:nowrap;
+  }
+  table.schedule td.week{
+    font-family:"IBM Plex Mono",monospace;
+    font-weight:600;
+    color:var(--teal);
+    white-space:nowrap;
+  }
+  @media (max-width:480px){
+    table.schedule, table.schedule tbody, table.schedule tr, table.schedule td{display:block; width:100%;}
+    table.schedule thead{display:none;}
+    table.schedule tr{border-bottom:1px solid var(--line); padding-block:10px;}
+    table.schedule td{border-bottom:none; padding:3px 0;}
+    table.schedule td.week{color:var(--accent); font-size:0.8rem;}
+  }
+
+  .resource-grid{
+    display:grid; gap:14px;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    margin-top:18px;
+  }
+  .resource-card{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:16px 18px;
+  }
+  .resource-card h3{
+    font-family:"Work Sans",sans-serif;
+    font-size:1rem;
+    font-weight:700;
+    margin:0 0 4px;
+  }
+  .resource-card p{margin:0; font-size:0.92rem; color:var(--ink-soft);}
+  .resource-card a{font-weight:600;}
+
+  .crisis-card{border-left:3px solid var(--accent);}
+  .crisis-line{
+    font-family:"IBM Plex Mono",monospace;
+    font-weight:600;
+    color:var(--ink);
+    margin-top:6px;
+    display:block;
+  }
+
+  .contact-box{
+    background:var(--card);
+    border-radius:10px;
+    padding:22px;
+    margin-top:16px;
+  }
+  .copy-row{
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .copy-row code{
+    font-family:"IBM Plex Mono",monospace;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    padding:6px 10px;
+    border-radius:5px;
+    font-size:0.92rem;
+  }
+  button.copy-btn{
+    font-family:"Work Sans",sans-serif;
+    font-size:0.82rem;
+    font-weight:600;
+    background:var(--accent);
+    color:var(--accent-ink);
+    border:none;
+    border-radius:5px;
+    padding:6px 12px;
+    cursor:pointer;
+  }
+  button.copy-btn:hover{opacity:0.9;}
+
+  footer{
+    padding-block:28px 40px;
+    font-size:0.82rem;
+    color:var(--ink-soft);
+  }
+  footer p{max-width:60ch;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <nav class="top-nav">
+    <a href="#basics">Basics</a>
+    <a href="#who">Who This Is For</a>
+    <a href="#expect">What to Expect</a>
+    <a href="#resources">Resources</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <section id="top" style="padding-top:28px;">
+    <span class="eyebrow">Sex and Love Addicts Anonymous</span>
+    <h1>Rainbow of Serenity</h1>
+    <p class="lede">A closed meeting for sex and/or love addicts, and a dedicated, affirming space for LGBTQIA+ members in recovery. We meet weekly online — everyone works the same program, together.</p>
+  </section>
+
+  <section id="basics">
+    <span class="eyebrow">The Basics</span>
+    <h2>When &amp; how to join</h2>
+    <div class="basics-grid">
+      <div class="basics-card">
+        <span class="eyebrow">Day &amp; time</span>
+        <strong>Wednesdays, 3:00 PM</strong>
+        <span>MST (Arizona time — no daylight saving)</span>
+      </div>
+      <div class="basics-card">
+        <span class="eyebrow">Format</span>
+        <strong>Online</strong>
+        <span>Zoom, with phone dial-in available</span>
+      </div>
+      <div class="basics-card">
+        <span class="eyebrow">Zoom link</span>
+        <strong><span class="placeholder">[zoom.us/j/xxxxx]</span></strong>
+        <span>ID <span class="placeholder">[xxx xxx xxxx]</span> · Passcode <span class="placeholder">[xxxx]</span></span>
+      </div>
+      <div class="basics-card">
+        <span class="eyebrow">Dial-in</span>
+        <strong><span class="placeholder">[+1 xxx-xxx-xxxx]</span></strong>
+        <span>Same meeting ID &amp; passcode</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="who">
+    <span class="eyebrow">Who This Is For</span>
+    <h2>A closed, LGBTQIA+ affirming meeting</h2>
+    <p>This is a closed SLAA meeting: it's for people who identify, or think they might identify, as a sex and/or love addict. You don't need certainty to attend — if you're questioning whether this program is for you, you're welcome here.</p>
+    <div class="callout">
+      <p>This meeting was built as a space where LGBTQIA+ members don't have to explain or translate their experience before they can talk about their recovery. Members of all sexual orientations and gender identities are welcome, straight and cisgender allies in the fellowship included, as long as everyone shows up ready to honor that focus.</p>
+      <p>What's shared here stays here. Anonymity protects everyone — inside the meeting and outside it.</p>
+    </div>
+  </section>
+
+  <section id="expect">
+    <span class="eyebrow">What to Expect</span>
+    <h2>Our format rotates every week</h2>
+    <p>One chairperson keeps the meeting running week to week, and every other role is filled by whoever volunteers that day — reading, timing, greeting, tech host. Showing up early to take a role is a good way to get more out of the meeting.</p>
+    <table class="schedule">
+      <caption>Monthly rotation</caption>
+      <thead>
+        <tr><th>Week</th><th>Format</th><th>What happens</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="week">Week 1</td>
+          <td>Step study</td>
+          <td>We work through the Twelve Steps together, one at a time, with sharing tied to that step.</td>
+        </tr>
+        <tr>
+          <td class="week">Week 2</td>
+          <td>Big Book reading</td>
+          <td>We read aloud from SLAA's Basic Text and share on whatever the reading brings up.</td>
+        </tr>
+        <tr>
+          <td class="week">Week 3</td>
+          <td>Speaker</td>
+          <td>One member shares their story start to finish, then the floor opens for sharing.</td>
+        </tr>
+        <tr>
+          <td class="week">Last week</td>
+          <td>Open + activity</td>
+          <td>Open sharing on any topic, plus a fun group activity or team-bonding time — recovery needs connection too.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px; font-size:0.88rem; color:var(--ink-soft);">Months with a fifth week: <span class="placeholder">[chair's call — usually repeats speaker or open format]</span>.</p>
+  </section>
+
+  <section id="resources">
+    <span class="eyebrow">Resources</span>
+    <h2>Literature &amp; support</h2>
+    <div class="resource-grid">
+      <div class="resource-card">
+        <h3>SLAA Fellowship-Wide Services</h3>
+        <p>The Basic Text, the Twelve Steps and Traditions, pamphlets, and the full meeting directory.</p>
+        <p><a href="https://slaafws.org" target="_blank" rel="noopener">slaafws.org →</a></p>
+      </div>
+      <div class="resource-card crisis-card">
+        <h3>988 Suicide &amp; Crisis Lifeline</h3>
+        <p>Call or text, 24/7, for anyone in crisis.</p>
+        <span class="crisis-line">Call or text 988</span>
+      </div>
+      <div class="resource-card crisis-card">
+        <h3>Trevor Project</h3>
+        <p>Crisis support for LGBTQIA+ young people, 24/7.</p>
+        <span class="crisis-line">1-866-488-7386</span>
+        <p style="margin-top:4px;"><a href="https://www.thetrevorproject.org" target="_blank" rel="noopener">thetrevorproject.org →</a></p>
+      </div>
+      <div class="resource-card crisis-card">
+        <h3>Trans Lifeline</h3>
+        <p>Peer support run by and for trans people.</p>
+        <span class="crisis-line">877-565-8860</span>
+        <p style="margin-top:4px;"><a href="https://translifeline.org" target="_blank" rel="noopener">translifeline.org →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <span class="eyebrow">Contact</span>
+    <h2>Reach the group</h2>
+    <p>Newcomers, questions about the format, or interested in service — the group inbox reaches the chair and secretary, not any one person's personal email.</p>
+    <div class="contact-box">
+      <span class="eyebrow">Group email</span>
+      <div class="copy-row">
+        <code id="group-email">rainbowofserenityslaa@gmail.com</code>
+        <button class="copy-btn" id="copy-email-btn" type="button">Copy</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>This page doesn't speak for SLAA as a whole, only for this meeting. In keeping with our traditions, it names no members and no specific city.</p>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    var btn = document.getElementById('copy-email-btn');
+    var codeEl = document.getElementById('group-email');
+    if(!btn || !codeEl) return;
+    btn.addEventListener('click', function(){
+      var text = codeEl.textContent;
+      function fallback(){
+        try{
+          var range = document.createRange();
+          range.selectNodeContents(codeEl);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }catch(e){}
+      }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(function(){
+          btn.textContent = 'Copied';
+          setTimeout(function(){ btn.textContent = 'Copy'; }, 1500);
+        }).catch(fallback);
+      } else {
+        fallback();
+      }
+    });
+  })();
+</script>
+</body>
+</html>
