@@ -160,6 +160,24 @@
   }
   .meeting-sub{text-align:center; color:var(--ink-soft); font-size:0.82rem; margin-top:-4px;}
 
+  input[type="text"]{
+    width:100%; font-family:"Work Sans",sans-serif; font-size:0.95rem;
+    padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+    background:var(--bg); color:var(--ink);
+  }
+  .feed-meta{display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
+  .feed-count{font-family:"IBM Plex Mono",monospace; font-size:0.7rem; color:var(--ink-soft);}
+  .feed-status{font-size:0.85rem; color:var(--ink-soft); margin:10px 0 0; min-height:1.2em;}
+  .feed-status.error{color:#c0392b;}
+  .feed-post{border-bottom:1px solid var(--line); padding:12px 0;}
+  .feed-post:last-child{border-bottom:none;}
+  .feed-name{font-weight:700; font-size:0.9rem;}
+  .feed-time{
+    font-family:"IBM Plex Mono",monospace; font-size:0.68rem; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.06em; margin-left:6px;
+  }
+  .feed-text{margin:4px 0 0; font-size:0.95rem; white-space:pre-wrap; overflow-wrap:anywhere;}
+
   nav.tabbar{
     position:fixed; bottom:0; left:0; right:0; z-index:20;
     background:var(--bg-raised); border-top:1px solid var(--line);
@@ -283,10 +301,24 @@
 
   <section class="panel" id="panel-community">
     <h2>Community</h2>
-    <p class="lede">Coming soon.</p>
-    <div class="card">
-      <p style="margin:0;">A shared community feed is on the way — one that works without anyone needing an account. In the meantime, reach the group directly:</p>
+    <p class="lede">A live, shared feed for the group. No account needed. Use a first name or initial only, and keep what's shared here within our traditions of anonymity.</p>
+    <div class="card" id="feed-setup" hidden>
+      <p style="margin:0;">The community feed isn't switched on yet. In the meantime, reach the group directly:</p>
       <p style="margin-top:12px;"><a href="mailto:rainbowofserenityslaa@gmail.com">rainbowofserenityslaa@gmail.com</a></p>
+    </div>
+    <div class="card" id="feed-compose">
+      <label for="feed-name">Name (first name or initial)</label>
+      <input type="text" id="feed-name" maxlength="30" placeholder="Anonymous" autocomplete="off">
+      <label for="feed-text" style="margin-top:14px;">Share with the group</label>
+      <textarea id="feed-text" maxlength="500" placeholder="A share, some encouragement, a gratitude..."></textarea>
+      <div class="feed-meta">
+        <span class="feed-count" id="feed-count">0 / 500</span>
+      </div>
+      <button class="btn" id="feed-post">Post</button>
+      <p class="feed-status" id="feed-status" role="status"></p>
+    </div>
+    <div class="card" id="feed-list" aria-live="polite">
+      <p class="empty-note">Loading the feed…</p>
     </div>
   </section>
 
@@ -584,5 +616,148 @@
     }
   })();
 </script>
+<script type="module">
+  // Community feed, stored live in Firebase Firestore.
+  // To switch it on, paste your Firebase web config below (see docs/feed-setup.md).
+  var firebaseConfig = {
+    apiKey: "",
+    authDomain: "",
+    projectId: "",
+    appId: ""
+  };
+
+  var MAX_POSTS = 50;
+  var nameEl = document.getElementById('feed-name');
+  var textEl = document.getElementById('feed-text');
+  var countEl = document.getElementById('feed-count');
+  var postBtn = document.getElementById('feed-post');
+  var statusEl = document.getElementById('feed-status');
+  var listEl = document.getElementById('feed-list');
+
+  function setStatus(msg, isError){
+    statusEl.textContent = msg || '';
+    statusEl.classList.toggle('error', !!isError);
+  }
+
+  function timeAgo(date){
+    if(!date) return 'just now';
+    var secs = Math.floor((Date.now() - date.getTime()) / 1000);
+    if(secs < 60) return 'just now';
+    var mins = Math.floor(secs / 60);
+    if(mins < 60) return mins + 'm ago';
+    var hours = Math.floor(mins / 60);
+    if(hours < 24) return hours + 'h ago';
+    var days = Math.floor(hours / 24);
+    if(days < 7) return days + 'd ago';
+    return date.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+  }
+
+  function renderPosts(posts){
+    listEl.innerHTML = '';
+    if(posts.length === 0){
+      listEl.innerHTML = '<p class="empty-note">No posts yet. Yours can be the first.</p>';
+      return;
+    }
+    posts.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'feed-post';
+      var name = document.createElement('span');
+      name.className = 'feed-name';
+      name.textContent = p.name || 'Anonymous';
+      var time = document.createElement('span');
+      time.className = 'feed-time';
+      time.textContent = timeAgo(p.createdAt);
+      var text = document.createElement('p');
+      text.className = 'feed-text';
+      text.textContent = p.text;
+      row.appendChild(name);
+      row.appendChild(time);
+      row.appendChild(text);
+      listEl.appendChild(row);
+    });
+  }
+
+  try{
+    var savedName = localStorage.getItem('ros_feed_name');
+    if(savedName) nameEl.value = savedName;
+  }catch(e){}
+
+  textEl.addEventListener('input', function(){
+    countEl.textContent = textEl.value.length + ' / 500';
+  });
+
+  if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
+    document.getElementById('feed-setup').hidden = false;
+    document.getElementById('feed-compose').hidden = true;
+    listEl.hidden = true;
+  } else {
+    start().catch(function(err){
+      console.error(err);
+      listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load. Check your connection and try again.</p>';
+    });
+  }
+
+  async function start(){
+    var sdk = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    var appMod = await import(sdk + 'firebase-app.js');
+    var fs = await import(sdk + 'firebase-firestore.js');
+    var app = appMod.initializeApp(firebaseConfig);
+    var db = fs.getFirestore(app);
+    var feed = fs.collection(db, 'feed');
+    var latest = [];
+
+    fs.onSnapshot(
+      fs.query(feed, fs.orderBy('createdAt', 'desc'), fs.limit(MAX_POSTS)),
+      function(snap){
+        latest = snap.docs.map(function(d){
+          var data = d.data({serverTimestamps:'estimate'});
+          return {
+            name: data.name,
+            text: data.text,
+            createdAt: data.createdAt ? data.createdAt.toDate() : null
+          };
+        });
+        renderPosts(latest);
+      },
+      function(err){
+        console.error(err);
+        listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load right now. Please try again later.</p>';
+      }
+    );
+
+    // Keep the "5m ago" labels fresh without reloading.
+    setInterval(function(){ if(latest.length) renderPosts(latest); }, 60000);
+
+    var lastPostAt = 0;
+    postBtn.addEventListener('click', async function(){
+      var text = textEl.value.trim();
+      var name = nameEl.value.trim().slice(0, 30);
+      if(!text){ setStatus('Write something first.', true); return; }
+      if(text.length > 500){ setStatus('Please keep posts under 500 characters.', true); return; }
+      if(Date.now() - lastPostAt < 15000){ setStatus('Give it a few seconds before posting again.', true); return; }
+
+      postBtn.disabled = true;
+      setStatus('Posting…');
+      try{
+        await fs.addDoc(feed, {
+          name: name || 'Anonymous',
+          text: text,
+          createdAt: fs.serverTimestamp()
+        });
+        lastPostAt = Date.now();
+        try{ localStorage.setItem('ros_feed_name', name); }catch(e){}
+        textEl.value = '';
+        countEl.textContent = '0 / 500';
+        setStatus('Posted.');
+      }catch(err){
+        console.error(err);
+        setStatus('That didn\'t go through. Please try again.', true);
+      }finally{
+        postBtn.disabled = false;
+      }
+    });
+  }
+</script>
+
 </body>
 </html>
