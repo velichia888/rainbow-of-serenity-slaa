@@ -269,6 +269,16 @@
   }
   button.copy-btn:hover{opacity:0.9;}
 
+  .remind-form{display:grid; gap:8px; margin-top:10px;}
+  .remind-form label{font-size:0.85rem; font-weight:600; color:var(--ink);}
+  .remind-form select{
+    font:inherit; font-size:16px; padding:8px 10px;
+    border:1px solid var(--line); border-radius:5px;
+    background:var(--bg-raised); color:var(--ink); width:100%;
+  }
+  .remind-actions{display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:4px;}
+  .remind-actions button.copy-btn{font-size:0.9rem; padding:8px 14px;}
+
   footer{
     padding-block:28px 40px;
     font-size:0.82rem;
@@ -555,6 +565,24 @@
         <p>Pick an open date and role — no account needed, just add your name.</p>
         <p><a href="https://docs.google.com/spreadsheets/d/1qj24DDP9ckdMLWsu5MiEuUwoq5fSSO5ARMEFScPqGNI/edit?usp=sharing" target="_blank" rel="noopener">Open sign-up sheet →</a></p>
       </div>
+      <div class="resource-card">
+        <h3>Get a reminder</h3>
+        <p>Signed up? Add your service date to your phone's calendar. It will remind you the day before and 1 hour before the meeting.</p>
+        <form class="remind-form" id="remind-form">
+          <label for="remind-date">Date</label>
+          <select id="remind-date"></select>
+          <label for="remind-role">Role</label>
+          <select id="remind-role">
+            <option value="Chair">Chair</option>
+            <option value="Timer">Timer</option>
+            <option value="Speaker">Speaker</option>
+          </select>
+          <div class="remind-actions">
+            <button class="copy-btn" type="submit">Add to my calendar</button>
+            <a href="#" id="remind-google" target="_blank" rel="noopener">Google Calendar →</a>
+          </div>
+        </form>
+      </div>
     </div>
   </section>
 
@@ -604,6 +632,11 @@
         <h3>SLAA Fellowship-Wide Services</h3>
         <p>The Basic Text, the Twelve Steps and Traditions, pamphlets, and the full meeting directory.</p>
         <p><a href="https://slaafws.org" target="_blank" rel="noopener">slaafws.org →</a></p>
+      </div>
+      <div class="resource-card">
+        <h3>Readings &amp; Literature</h3>
+        <p>Daily meditations, free SLAA readings, and where to get the books.</p>
+        <p><a href="docs/readings.html" target="_blank" rel="noopener">Open readings →</a></p>
       </div>
       <div class="resource-card crisis-card">
         <h3>988 Suicide &amp; Crisis Lifeline</h3>
@@ -740,6 +773,90 @@
         result.textContent = 'Topic: ' + topics[pendingIndex];
         pendingIndex = null;
       }
+    });
+  })();
+
+  (function(){
+    var form = document.getElementById('remind-form');
+    var dateSel = document.getElementById('remind-date');
+    var roleSel = document.getElementById('remind-role');
+    var gLink = document.getElementById('remind-google');
+    if(!form || !dateSel || !roleSel || !gLink) return;
+    var ZOOM = 'https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBVblzVXP.1';
+    var NOTES = {
+      Chair: 'You are chairing: open the meeting, read the format, and keep things moving.',
+      Timer: 'You are the timer: keep shares within the time limit, gently.',
+      Speaker: 'You are the speaker: share your story to open the floor.'
+    };
+    function pad(n){ return (n < 10 ? '0' : '') + n; }
+    // Meeting is Wednesdays 3:00 PM Arizona time (UTC-7 all year, no daylight saving) = 22:00 UTC.
+    function meetingStart(y, m, d){ return new Date(Date.UTC(y, m, d, 22, 0, 0)); }
+    function stamp(dt){
+      return dt.getUTCFullYear() + pad(dt.getUTCMonth() + 1) + pad(dt.getUTCDate()) + 'T' +
+        pad(dt.getUTCHours()) + pad(dt.getUTCMinutes()) + '00Z';
+    }
+    // Next 12 Wednesdays, starting with today if the meeting hasn't started yet.
+    var now = new Date();
+    var az = new Date(now.getTime() - 7 * 3600 * 1000);
+    var y = az.getUTCFullYear(), m = az.getUTCMonth(), d = az.getUTCDate();
+    d += (3 - az.getUTCDay() + 7) % 7;
+    if(meetingStart(y, m, d) <= now) d += 7;
+    for(var i = 0; i < 12; i++){
+      var start = meetingStart(y, m, d + i * 7);
+      var opt = document.createElement('option');
+      opt.value = start.toISOString();
+      opt.textContent = start.toLocaleDateString('en-US', {timeZone:'UTC', weekday:'short', month:'short', day:'numeric'});
+      dateSel.appendChild(opt);
+    }
+    function details(){
+      var start = new Date(dateSel.value);
+      var end = new Date(start.getTime() + 30 * 60 * 1000);
+      var role = roleSel.value;
+      return {
+        start: start, end: end, role: role,
+        title: 'Rainbow of Serenity: my service (' + role + ')',
+        desc: NOTES[role] + ' Meeting is at 3:00 PM Arizona time. Zoom: ' + ZOOM
+      };
+    }
+    function esc(t){ return t.replace(/\\/g, '\\\\').replace(/[,;]/g, '\\$&'); }
+    function updateGoogle(){
+      var e = details();
+      gLink.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+        '&text=' + encodeURIComponent(e.title) +
+        '&dates=' + stamp(e.start) + '/' + stamp(e.end) +
+        '&details=' + encodeURIComponent(e.desc) +
+        '&location=' + encodeURIComponent(ZOOM);
+    }
+    dateSel.addEventListener('change', updateGoogle);
+    roleSel.addEventListener('change', updateGoogle);
+    updateGoogle();
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      var e = details();
+      var ics = [
+        'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Rainbow of Serenity//Service//EN',
+        'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'BEGIN:VEVENT',
+        'UID:service-' + stamp(e.start) + '-' + e.role.toLowerCase() + '@rainbow-of-serenity',
+        'DTSTAMP:' + stamp(new Date()),
+        'DTSTART:' + stamp(e.start), 'DTEND:' + stamp(e.end),
+        'SUMMARY:' + esc(e.title), 'LOCATION:' + esc(ZOOM), 'URL:' + ZOOM,
+        'DESCRIPTION:' + esc(e.desc),
+        'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc('Tomorrow you are ' + e.role + ' at Rainbow of Serenity'), 'TRIGGER:-P1D', 'END:VALARM',
+        'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc('You are ' + e.role + ' at Rainbow of Serenity in 1 hour'), 'TRIGGER:-PT1H', 'END:VALARM',
+        'END:VEVENT', 'END:VCALENDAR'
+      ].map(function(line){
+        var out = '';
+        while(line.length > 74){ out += line.slice(0, 74) + '\r\n '; line = line.slice(74); }
+        return out + line;
+      }).join('\r\n');
+      var url = URL.createObjectURL(new Blob([ics], {type:'text/calendar;charset=utf-8'}));
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'rainbow-service-' + stamp(e.start).slice(0, 8) + '.ics';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 10000);
     });
   })();
 </script>
