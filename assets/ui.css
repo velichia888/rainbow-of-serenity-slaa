@@ -1,25 +1,43 @@
 /* Shared by the site, the app and the docs pages: dark mode, the quick exit
    button, and the next-meeting strip. Loaded after each page's own styles. */
 
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#1c1a20;
-    --bg-raised:#26232b;
-    --ink:#ece6dd;
-    --ink-soft:#a9a29a;
-    --line:#3b3640;
-    --accent:#ff7d62;
-    --accent-ink:#1c1a20;
-    --teal:#4fcfba;
-    --card:#2c2830;
-    --focus:#ece6dd;
-    color-scheme:dark;
-  }
-  /* The logo artwork has dark lettering, so it sits on a cream badge. */
-  .hero-logo img{background:#fffaf3; border-radius:18px; padding:14px 10px 6px;}
-  .app-header .mark, header .mark{background:#fffaf3; border-radius:50%;}
-  img[src$="logo-icon.svg"]{background:#fffaf3; border-radius:50%;}
+/* Dark mode: assets/theme.js adds class "dark" from the phone setting or
+   the member's choice on the theme button. Same design and accent colors as
+   light mode; only the warm cream backgrounds and text turn dark. */
+html.dark{
+  --bg:#1f1a16;
+  --bg-raised:#2a241e;
+  --ink:#f3ebe0;
+  --ink-soft:#b3a797;
+  --line:#4a3d30;
+  --card:#3a2d20;
+  --focus:#f3ebe0;
+  color-scheme:dark;
 }
+/* The logo artwork has dark lettering, so it sits on its cream background. */
+html.dark .hero-logo img{background:#fffaf3; border-radius:18px; padding:14px 10px 6px;}
+html.dark img[src$="logo-icon.svg"]{background:#fffaf3; border-radius:50%;}
+/* The pride bar is see-through over cream in light mode; use those same
+   blended colors so it looks identical on dark. */
+html.dark .callout-pride::before{
+  background:linear-gradient(180deg,#ef8286,#f7bc85,#f7d986,#7dc992,#82ade7,#c391df);
+}
+
+/* Theme button: Auto (follow the phone), Light, Dark. */
+.theme-btn{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:5px 11px; border:1px solid var(--line); border-radius:999px;
+  background:var(--bg-raised); color:var(--ink);
+  font:600 0.78rem/1.2 "Work Sans",-apple-system,sans-serif;
+  cursor:pointer; white-space:nowrap;
+}
+.theme-btn svg{width:15px; height:15px; flex-shrink:0;}
+.theme-btn:hover{border-color:var(--accent);}
+nav.top-nav .theme-btn{margin-left:auto;}
+.app-header .theme-btn{margin-left:auto; min-height:36px;}
+.app-header .theme-btn span{display:inline; font:inherit; text-transform:none; letter-spacing:0; color:inherit;}
+.app-header .theme-btn + .text-size-btn{margin-left:8px;}
+.back-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
 
 /* Quick exit: one tap swaps the page for a weather site. */
 body:not(.has-tabbar){padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px));}
@@ -36,10 +54,8 @@ body:not(.has-tabbar){padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px
 .quick-exit:hover{background:#000;}
 .quick-exit:focus-visible{outline:2px solid var(--accent,#ff6a4d); outline-offset:3px;}
 .has-tabbar .quick-exit{bottom:calc(86px + env(safe-area-inset-bottom, 0px));}
-@media (prefers-color-scheme: dark){
-  .quick-exit{background:#ece6dd; color:#1c1a20;}
-  .quick-exit:hover{background:#fff;}
-}
+html.dark .quick-exit{background:#f3ebe0; color:#1f1a16;}
+html.dark .quick-exit:hover{background:#fff;}
 
 /* Next meeting strip */
 .next-meeting{
