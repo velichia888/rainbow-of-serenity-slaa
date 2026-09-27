@@ -7,7 +7,8 @@
 <meta name="description" content="A private companion app for Rainbow of Serenity members — recovery counter, check-ins, and meeting info.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#fffaf3">
+<meta name="theme-color" content="#fffaf3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1c1a20" media="(prefers-color-scheme: dark)">
 <link rel="icon" type="image/svg+xml" href="../assets/logo-icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
@@ -159,11 +160,6 @@
   .entry-text{margin:4px 0 0; font-size:0.92rem;}
   .empty-note{color:var(--ink-soft); font-size:0.9rem; font-style:italic;}
 
-  .meeting-countdown{
-    text-align:center; padding:14px 0;
-    font-family:"IBM Plex Mono",monospace; font-size:1.3rem; color:var(--accent); font-weight:600;
-  }
-  .meeting-sub{text-align:center; color:var(--ink-soft); font-size:0.82rem; margin-top:-4px;}
 
   input[type="text"]{
     width:100%; font-family:"Work Sans",sans-serif; font-size:0.95rem;
@@ -225,8 +221,9 @@
   }
   .save-error{color:#c0392b; font-size:0.85rem; margin:8px 0 0;}
 </style>
+<link rel="stylesheet" href="../assets/ui.css">
 </head>
-<body>
+<body class="has-tabbar">
 
 <header class="app-header">
   <div class="header-inner">
@@ -242,6 +239,7 @@
 <main>
 
   <section class="panel active" id="panel-counter">
+    <div data-next-meeting></div>
     <h2>Recovery counter</h2>
     <p class="lede">Private to this device — nothing here is shared with anyone.</p>
     <p class="storage-note" data-storage-note hidden></p>
@@ -312,10 +310,7 @@
   <section class="panel" id="panel-meeting">
     <h2>Next meeting</h2>
     <p class="lede">Wednesdays, 3:00 PM MST (Arizona time — no daylight saving).</p>
-    <div class="card">
-      <div class="meeting-countdown" id="meeting-countdown">—</div>
-      <p class="meeting-sub">until Rainbow of Serenity</p>
-    </div>
+    <div data-next-meeting></div>
     <div class="card">
       <label>Join Zoom</label>
       <p style="margin:4px 0 10px;"><a href="https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBVblzVXP.1" target="_blank" rel="noopener">Open Zoom link →</a></p>
@@ -548,31 +543,6 @@
     });
 
     renderEntries();
-  })();
-
-  (function(){
-    var el = document.getElementById('meeting-countdown');
-    if(!el) return;
-    function nextMeeting(){
-      var now = new Date();
-      var target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 22, 0, 0));
-      var day = target.getUTCDay();
-      var diffDays = (3 - day + 7) % 7;
-      target.setUTCDate(target.getUTCDate() + diffDays);
-      if(target <= now){ target.setUTCDate(target.getUTCDate() + 7); }
-      return target;
-    }
-    function update(){
-      var now = new Date();
-      var target = nextMeeting();
-      var diff = target - now;
-      var d = Math.floor(diff / 86400000);
-      var h = Math.floor((diff % 86400000) / 3600000);
-      var m = Math.floor((diff % 3600000) / 60000);
-      el.textContent = d + 'd ' + h + 'h ' + m + 'm';
-    }
-    update();
-    setInterval(update, 30000);
   })();
 
   (function(){
@@ -909,5 +879,6 @@
 </script>
 <script src="../assets/visits.js" defer></script>
 
+<script src="../assets/ui.js"></script>
 </body>
 </html>

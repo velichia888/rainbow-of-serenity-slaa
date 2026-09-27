@@ -1,0 +1,75 @@
+/* Shared by the site, the app and the docs pages: dark mode, the quick exit
+   button, and the next-meeting strip. Loaded after each page's own styles. */
+
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1c1a20;
+    --bg-raised:#26232b;
+    --ink:#ece6dd;
+    --ink-soft:#a9a29a;
+    --line:#3b3640;
+    --accent:#ff7d62;
+    --accent-ink:#1c1a20;
+    --teal:#4fcfba;
+    --card:#2c2830;
+    --focus:#ece6dd;
+    color-scheme:dark;
+  }
+  /* The logo artwork has dark lettering, so it sits on a cream badge. */
+  .hero-logo img{background:#fffaf3; border-radius:18px; padding:14px 10px 6px;}
+  .app-header .mark, header .mark{background:#fffaf3; border-radius:50%;}
+  img[src$="logo-icon.svg"]{background:#fffaf3; border-radius:50%;}
+}
+
+/* Quick exit: one tap swaps the page for a weather site. */
+body:not(.has-tabbar){padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px));}
+.quick-exit{
+  position:fixed; z-index:1000;
+  right:12px; bottom:calc(14px + env(safe-area-inset-bottom, 0px));
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 14px; border:0; border-radius:999px;
+  background:#3a3a3a; color:#fff;
+  font:600 0.82rem/1 "Work Sans",-apple-system,sans-serif;
+  box-shadow:0 2px 10px rgba(0,0,0,0.25);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.quick-exit:hover{background:#000;}
+.quick-exit:focus-visible{outline:2px solid var(--accent,#ff6a4d); outline-offset:3px;}
+.has-tabbar .quick-exit{bottom:calc(86px + env(safe-area-inset-bottom, 0px));}
+@media (prefers-color-scheme: dark){
+  .quick-exit{background:#ece6dd; color:#1c1a20;}
+  .quick-exit:hover{background:#fff;}
+}
+
+/* Next meeting strip */
+.next-meeting{
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  gap:10px 16px;
+  background:var(--bg-raised); border:1px solid var(--line); border-radius:12px;
+  padding:14px 16px; margin:0 0 18px;
+}
+.next-meeting .nm-when{font-size:0.9rem; color:var(--ink-soft); line-height:1.35;}
+.next-meeting .nm-label{
+  display:block; font-family:"IBM Plex Mono",monospace; text-transform:uppercase;
+  letter-spacing:0.1em; font-size:0.66rem; font-weight:600; color:var(--teal);
+}
+.next-meeting .nm-count{
+  display:block; font-family:"IBM Plex Mono",monospace; font-weight:600;
+  font-size:1.25rem; color:var(--ink); margin:2px 0;
+}
+.next-meeting .nm-join{
+  display:inline-block; padding:11px 20px; border-radius:999px;
+  border:2px solid var(--accent); color:var(--accent); background:transparent;
+  font-weight:700; font-size:0.95rem; text-decoration:none; white-space:nowrap;
+}
+.next-meeting.is-live{border-color:var(--accent); background:var(--card);}
+.next-meeting.is-live .nm-label{color:var(--accent);}
+.next-meeting.is-live .nm-join{
+  background:var(--accent); color:var(--accent-ink,#fff);
+  animation:nm-pulse 1.8s ease-in-out infinite;
+}
+@keyframes nm-pulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(255,106,77,0.55);}
+  50%{box-shadow:0 0 0 9px rgba(255,106,77,0);}
+}
+@media (prefers-reduced-motion: reduce){ .next-meeting.is-live .nm-join{animation:none;} }
