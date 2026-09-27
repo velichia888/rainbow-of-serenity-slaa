@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script src="../assets/theme.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chair's Meeting Format</title>
+<meta name="description" content="The full Rainbow of Serenity meeting script for the chairperson, start to finish, in order.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fffaf3; --bg-raised:#ffffff; --ink:#3a3a3a; --ink-soft:#8f8f8f;
+    --line:#f0ddc4; --accent:#ff6a4d; --accent-ink:#ffffff; --teal:#0fa38f; --card:#fef1de;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  html{scroll-behavior:smooth; scroll-padding-top:64px;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Work Sans",-apple-system,sans-serif;
+    line-height:1.6; padding:32px 20px 60px;
+  }
+  .doc{max-width:640px; margin:0 auto;}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace; text-transform:uppercase;
+    letter-spacing:0.12em; font-size:0.7rem; color:var(--accent); font-weight:600;
+  }
+  h1{
+    font-family:"Fraunces",Georgia,serif; font-weight:600;
+    font-size:clamp(1.8rem,6vw,2.4rem); margin:8px 0 6px;
+  }
+  .lede{color:var(--ink-soft); margin:0 0 20px;}
+  a.back{color:var(--ink-soft); text-decoration:none; font-size:0.85rem;}
+  p{margin:0 0 10px;}
+
+  .jump{
+    position:sticky; top:0; z-index:5;
+    display:flex; gap:6px; margin:0 -20px 8px; padding:10px 20px;
+    background:var(--bg); border-bottom:1px solid var(--line);
+  }
+  .jump a{
+    flex:1; text-align:center; text-decoration:none;
+    padding:7px 4px; border-radius:999px; border:1px solid var(--line);
+    color:var(--ink); font-size:0.82rem; font-weight:600; background:var(--bg-raised);
+  }
+  .jump a span{
+    display:block; font-family:"IBM Plex Mono",monospace; font-size:0.62rem;
+    font-weight:600; color:var(--teal); letter-spacing:0.04em;
+  }
+
+  .this-week{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:12px;
+    padding:16px 18px; margin:16px 0 8px;
+  }
+  .this-week .label{
+    font-family:"IBM Plex Mono",monospace; font-size:0.66rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.1em; color:var(--teal);
+  }
+  .this-week .format{
+    font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.3rem; margin:2px 0 4px;
+  }
+  .this-week .date, .this-week .extra{font-size:0.88rem; color:var(--ink-soft); margin:0;}
+  .this-week .extra{margin-top:6px; color:var(--ink);}
+
+  .part{
+    display:flex; align-items:baseline; gap:10px; flex-wrap:wrap;
+    font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.45rem;
+    margin:40px 0 4px; padding-top:4px; border-top:2px solid var(--line);
+  }
+  .part .time{
+    font-family:"IBM Plex Mono",monospace; font-size:0.75rem; font-weight:600;
+    color:var(--teal); letter-spacing:0.04em;
+  }
+
+  .step{margin:22px 0 0;}
+  .step-head{
+    display:flex; align-items:center; gap:10px; width:100%;
+    background:none; border:0; padding:0; margin:0 0 6px; text-align:left;
+    color:var(--ink); cursor:pointer; font:inherit;
+  }
+  .step-head .check{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%;
+    border:2px solid var(--line); background:var(--bg-raised);
+    display:flex; align-items:center; justify-content:center;
+    font-family:"IBM Plex Mono",monospace; font-size:0.75rem; font-weight:600; color:var(--ink-soft);
+  }
+  .step-head .title{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.1rem; flex:1;}
+  .step-head .mins{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; color:var(--ink-soft); white-space:nowrap;
+  }
+  .step.done .check{background:var(--teal); border-color:var(--teal); color:#fff;}
+  .step.done .step-body{opacity:0.45;}
+  .step.done .title{text-decoration:line-through; text-decoration-color:var(--ink-soft);}
+  .step-body{padding-left:36px;}
+
+  .say{
+    background:var(--card); border-left:3px solid var(--accent);
+    border-radius:4px; padding:12px 16px; margin:8px 0;
+  }
+  .cue{
+    font-family:"IBM Plex Mono",monospace; font-size:0.72rem;
+    text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin:0;
+  }
+  .pause{
+    font-family:"IBM Plex Mono",monospace; font-size:0.72rem;
+    font-style:italic; color:var(--ink-soft); margin:6px 0 0 16px;
+  }
+  .tip{font-size:0.85rem; color:var(--ink-soft);}
+  .only{
+    display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:0.66rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--accent);
+    border:1px solid var(--accent); border-radius:999px; padding:1px 8px; margin-bottom:6px;
+  }
+
+  ul.prep{list-style:none; padding:0; margin:8px 0 0;}
+  ul.prep li{padding:6px 0 6px 26px; position:relative; border-bottom:1px solid var(--line); font-size:0.95rem;}
+  ul.prep li::before{content:"○"; position:absolute; left:4px; color:var(--teal); font-weight:700;}
+
+  .roles{display:grid; gap:10px; margin:10px 0 0;}
+  .roles div{display:flex; align-items:baseline; gap:8px; font-size:0.92rem;}
+  .roles span{font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--ink-soft); min-width:88px;}
+  .fill-line{flex:1; border-bottom:1px dashed var(--line); min-width:120px; height:1.3em;}
+  h2.sub{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.1rem; margin:26px 0 6px;}
+
+  .note{
+    background:var(--card); border-radius:8px; padding:16px 18px;
+    margin-top:36px; font-size:0.88rem; color:var(--ink-soft);
+  }
+  .note a, .lede a{color:var(--accent);}
+  .reset{
+    display:block; margin:28px auto 0; padding:10px 20px; border-radius:999px;
+    border:1px solid var(--line); background:var(--bg-raised); color:var(--ink);
+    font:600 0.88rem "Work Sans",-apple-system,sans-serif; cursor:pointer;
+  }
+  @media print{
+    .no-print, .jump, .reset{display:none;}
+    body{padding:0;}
+    .step.done .step-body{opacity:1;}
+    .step.done .title{text-decoration:none;}
+  }
+</style>
+<link rel="stylesheet" href="../assets/ui.css">
+</head>
+<body>
+<div class="doc">
+  <p class="no-print"><a class="back" href="../index.html">&larr; Back to Rainbow of Serenity</a></p>
+  <span class="eyebrow">Rainbow of Serenity · SLAA</span>
+  <h1>Chair's Meeting Format</h1>
+  <p class="lede">Everything the chair says, start to finish, in order. Tap a step's circle to check it off as you go. For the minute-by-minute overview, see the <a href="meeting-agenda.html">agenda</a>.</p>
+
+  <div class="this-week" id="this-week">
+    <div class="label">This Wednesday</div>
+    <div class="format" id="tw-format">Check the monthly rotation</div>
+    <p class="date" id="tw-date">3:00 PM Arizona, on Zoom</p>
+    <p class="extra" id="tw-extra" hidden></p>
+  </div>
+
+  <nav class="jump" aria-label="Jump to part">
+    <a href="#before">Before<span>−0:10</span></a>
+    <a href="#opening">Opening<span>0:00</span></a>
+    <a href="#sharing">Sharing<span>0:10</span></a>
+    <a href="#closing">Closing<span>0:25</span></a>
+  </nav>
+
+  <!-- ============ BEFORE ============ -->
+  <h2 class="part" id="before">Before the meeting <span class="time">10 min early</span></h2>
+  <ul class="prep">
+    <li>Open Zoom about 10 minutes early and let people in from the waiting room.</li>
+    <li>Check who's timing today, and who's speaking on a Speaker week.</li>
+    <li>Line up the reading for this week's format and a volunteer if you can.</li>
+    <li>Have the Seventh Tradition link ready to paste in the chat.</li>
+  </ul>
+  <h2 class="sub">Today's roles</h2>
+  <div class="roles">
+    <div><span>Chair</span><span class="fill-line"></span></div>
+    <div><span>Timer</span><span class="fill-line"></span></div>
+    <div><span>Speaker</span><span class="fill-line"></span></div>
+  </div>
+  <p class="tip" style="margin-top:6px;">Speaker only applies on third-Wednesday Speaker meetings. Leave it blank otherwise.</p>
+
+  <!-- ============ OPENING ============ -->
+  <h2 class="part" id="opening">Opening <span class="time">0:00–0:10</span></h2>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">1</span><span class="title">Welcome</span><span class="mins">0:00</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"Welcome to Rainbow of Serenity, a meeting of Sex and Love Addicts Anonymous. My name is [name], and I'm a sex and/or love addict, and your chairperson for today."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">2</span><span class="title">Moment of silence &amp; Serenity Prayer</span><span class="mins">0:01</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"Let's open with a moment of silence, followed by the Serenity Prayer."</p>
+        <p class="pause">(pause, silence for about 10 seconds)</p>
+        <p style="margin-top:10px;">Higher Power, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">3</span><span class="title">Who this meeting is for</span><span class="mins">0:02</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"This is a closed meeting: it's for those who identify, or think they might identify, as a sex and/or love addict. This meeting is also a dedicated, affirming space for our LGBTQIA+ members. Allies in the fellowship are welcome too, as long as we all keep that focus at the center of the room."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">4</span><span class="title">Anonymity statement</span><span class="mins">0:02</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"What is said here, who you see here, when you leave here, let it stay here. Anonymity is the spiritual foundation of all our traditions."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">5</span><span class="title">Reading</span><span class="mins">0:03 · 3 min</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"This week is our <span data-format-name>[step study / Big Book reading / speaker / open + activity]</span> meeting. Can I get a volunteer to read [the step / the tradition / the passage] for this week?"</p>
+        <p class="pause">(pause for a volunteer, then let them read)</p>
+      </div>
+      <p class="tip">Readings: <a href="twelve-steps.html">Twelve Steps</a> · <a href="twelve-traditions.html">Twelve Traditions</a> · <a href="readings.html">more literature</a>.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">6</span><span class="title">Member introductions</span><span class="mins">0:06 · 4 min</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"Let's go around. First name only, and 'sex and/or love addict' if that fits for you. I'll start: [name], sex and/or love addict."</p>
+        <p class="pause">(go around, one at a time)</p>
+      </div>
+      <p class="tip">If the group is large, trim this to name-only to protect sharing time.</p>
+    </div>
+  </div>
+
+  <!-- ============ SHARING ============ -->
+  <h2 class="part" id="sharing">Sharing <span class="time">0:10–0:25</span></h2>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">7</span><span class="title">Open the floor</span><span class="mins">0:10</span></button>
+    <div class="step-body">
+      <span class="only">Speaker weeks</span>
+      <div class="say">
+        <p>"This week we have a speaker. [Name], thank you for sharing your story with us. The floor is yours."</p>
+        <p class="pause">(when the speaker finishes, thank them, then open the floor below)</p>
+      </div>
+      <p class="cue" style="margin-top:12px;">Say:</p>
+      <div class="say">
+        <p>"With that, the floor is open. We've got about 15 minutes, so let's aim for around 2 minutes a share so more people get a turn."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">8</span><span class="title">Keep sharing moving</span><span class="mins">0:10–0:25</span></button>
+    <div class="step-body">
+      <p class="tip">The timer gently lets people know when they're near 2 minutes. After each share, a simple "Thank you, [name]" is enough.</p>
+      <p class="tip">If there's a silence, give it a moment. Then: "Is there anyone who hasn't shared yet who'd like to?"</p>
+      <p class="tip">On Open + Activity weeks, save a few minutes of this block for the group activity. The <a href="../index.html#wheel">topic wheel</a> is handy for picking a topic.</p>
+    </div>
+  </div>
+
+  <!-- ============ CLOSING ============ -->
+  <h2 class="part" id="closing">Closing <span class="time">0:25–0:30</span></h2>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">9</span><span class="title">Time check &amp; Seventh Tradition</span><span class="mins">0:25 · 2 min</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"That's time. Thank you to everyone who shared today. SLAA is fully self-supporting through our own contributions; we don't take outside funding. If you're able to chip in toward [Zoom costs / literature / group expenses], the link is in the chat and on our site."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">10</span><span class="title">Announcements</span><span class="mins">0:27 · 1 min</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"Any quick announcements? Service positions open, upcoming events?"</p>
+      </div>
+      <p class="tip" data-business hidden>First Wednesday: remind everyone the business meeting starts right after we close, and it's open to all members.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">11</span><span class="title">Closing reminder</span><span class="mins">0:28</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"A reminder that what's shared in this room stays in this room. Take what you need and leave the rest."</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <button type="button" class="step-head" aria-pressed="false"><span class="check">12</span><span class="title">Closing prayer &amp; send-off</span><span class="mins">0:29</span></button>
+    <div class="step-body">
+      <p class="cue">Say:</p>
+      <div class="say">
+        <p>"Let's close the way we opened, together: Higher Power, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference."</p>
+        <p class="pause">(let the room finish together)</p>
+        <p style="margin-top:10px;">"Keep coming back. It works if you work it. See you next Wednesday."</p>
+      </div>
+    </div>
+  </div>
+
+  <button type="button" class="reset" id="reset">Clear all checkmarks</button>
+
+  <div class="note">
+    Timed for a 30-minute Zoom meeting, to fit the free plan's limit for group calls. Adjust wording and timing to match how the meeting actually runs. Thank you for chairing.
+  </div>
+</div>
+<script>
+  (function(){
+    // Check off steps as the meeting goes. Saved for the day only, so a
+    // reload mid-meeting keeps your place.
+    var steps = Array.prototype.slice.call(document.querySelectorAll('.step'));
+    var KEY = 'ros_chair_steps';
+    var today = new Date().toDateString();
+    var done = [];
+    try{
+      var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if(saved && saved.day === today) done = saved.done;
+    }catch(e){}
+    function save(){
+      try{ localStorage.setItem(KEY, JSON.stringify({day:today, done:done})); }catch(e){}
+    }
+    function paint(){
+      steps.forEach(function(step, i){
+        var on = done.indexOf(i) !== -1;
+        step.classList.toggle('done', on);
+        var head = step.querySelector('.step-head');
+        head.setAttribute('aria-pressed', on ? 'true' : 'false');
+        head.querySelector('.check').textContent = on ? '✓' : String(i + 1);
+      });
+    }
+    steps.forEach(function(step, i){
+      step.querySelector('.step-head').addEventListener('click', function(){
+        var at = done.indexOf(i);
+        if(at === -1) done.push(i); else done.splice(at, 1);
+        save(); paint();
+      });
+    });
+    document.getElementById('reset').addEventListener('click', function(){ done = []; save(); paint(); });
+    paint();
+
+    // This Wednesday's format, from the monthly rotation on the home page.
+    // Arizona is UTC-7 all year; the meeting ends at 22:30 UTC.
+    var now = new Date();
+    var az = new Date(now.getTime() - 7 * 3600000);
+    var wed = new Date(Date.UTC(az.getUTCFullYear(), az.getUTCMonth(), az.getUTCDate()));
+    wed.setUTCDate(wed.getUTCDate() + (3 - wed.getUTCDay() + 7) % 7);
+    if(wed.getTime() + 22.5 * 3600000 <= now.getTime()) wed.setUTCDate(wed.getUTCDate() + 7);
+    var day = wed.getUTCDate();
+    var monthDays = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth() + 1, 0)).getUTCDate();
+    var isLast = day + 7 > monthDays;
+    var format, extra = '';
+    if(day <= 7) format = 'Step study';
+    else if(day <= 14) format = 'Big Book reading';
+    else if(day <= 21) format = 'Speaker';
+    else if(isLast) format = 'Open + activity';
+    else { format = 'Chair’s call'; extra = 'A fifth-week month: usually repeats the speaker or open format.'; }
+    if(day <= 7) extra = 'Business meeting right after, open to all members.';
+    if(format === 'Speaker') extra = 'No speaker signed up? It becomes Open + activity.';
+
+    document.getElementById('tw-format').textContent = format;
+    document.getElementById('tw-date').textContent =
+      wed.toLocaleDateString('en-US', {timeZone:'UTC', weekday:'long', month:'long', day:'numeric'}) + ', 3:00 PM Arizona, on Zoom';
+    if(extra){ var ex = document.getElementById('tw-extra'); ex.textContent = extra; ex.hidden = false; }
+    var names = {'Step study':'step study', 'Big Book reading':'Big Book reading', 'Speaker':'speaker', 'Open + activity':'open + activity'};
+    if(names[format]) document.querySelectorAll('[data-format-name]').forEach(function(el){ el.textContent = names[format]; });
+    if(day <= 7) document.querySelectorAll('[data-business]').forEach(function(el){ el.hidden = false; });
+  })();
+</script>
+<script src="../assets/ui.js"></script>
+</body>
+</html>
