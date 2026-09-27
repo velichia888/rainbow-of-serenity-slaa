@@ -1,7 +1,7 @@
 // Lets the Companion open with no signal. Pages are fetched fresh from the
 // network whenever possible (so updates show up right away) and the saved copy
 // is only used when the network fails. Firebase traffic is never touched.
-var CACHE = 'ros-companion-v1';
+var CACHE = 'ros-companion-v2';
 var CORE = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ var CORE = [
   '../assets/logo-icon.svg',
   '../assets/favicon-32.png',
   '../assets/apple-touch-icon.png',
+  './gallery.js',
   '../assets/visits.js',
   '../assets/ui.css',
   '../assets/ui.js'

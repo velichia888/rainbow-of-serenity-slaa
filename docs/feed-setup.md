@@ -54,3 +54,26 @@ The rules let visitors add 1 and nothing else, and only moderators can read the
 totals. Moderators see "today / last 7 days / last 30 days" at the bottom of the
 Community tab after signing in, and the daily numbers are also under
 **Firestore Database → Data → visits** in the Firebase console.
+
+## Photo gallery
+
+Below the feed, members can share photos (`app/gallery.js`). Before anything
+is uploaded, the app shrinks the photo and saves it again as a fresh JPEG on
+the member's own device, which removes location, camera and date details
+(EXIF). Members are reminded not to share faces or anything identifying, and
+must tick a box confirming it.
+
+New photos go into `gallerySubmissions`, which only moderators can see. A
+signed-in moderator sees a **Waiting for approval** list in the Community tab
+with **Approve** and **Remove** for each photo. Approving saves a cleaned copy
+into `gallery`, which everyone can see; tapping an approved photo gives
+moderators a **Remove** button. Photos share the feed's one-post-every-30-seconds
+limit.
+
+Photos are stored in Firestore as text rather than in Firebase Storage,
+because Storage now needs the paid Blaze plan. Each photo is kept under about
+350 KB, so the free plan's 1 GB holds a few thousand photos. The app shows the
+newest 24 and only downloads them when someone scrolls to the gallery.
+
+After changing `firestore.rules`, paste the whole file into the Firebase
+console again (**Firestore Database → Rules → Publish**).
