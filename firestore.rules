@@ -47,6 +47,17 @@ service cloud.firestore {
         && request.resource.data.last == request.time;
     }
 
+    // Anonymous visitor count: one number per day (visits/YYYY-MM-DD).
+    // Visitors can only add 1 to it; only moderators can read it.
+    match /visits/{day} {
+      allow read: if isModerator();
+      allow create: if day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+        && request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n == 1;
+      allow update: if request.resource.data.keys().hasOnly(['n'])
+        && request.resource.data.n == resource.data.n + 1;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

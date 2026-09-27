@@ -352,6 +352,7 @@
       <p class="empty-note">Loading the feed…</p>
     </div>
     <p class="feed-mod" id="feed-mod" hidden><span id="feed-mod-label"></span> <button type="button" id="feed-mod-btn">Moderator sign-in</button></p>
+    <p class="feed-mod" id="feed-visits" hidden></p>
   </section>
 
 </main>
@@ -691,6 +692,7 @@
   var modEl = document.getElementById('feed-mod');
   var modLabelEl = document.getElementById('feed-mod-label');
   var modBtn = document.getElementById('feed-mod-btn');
+  var visitsEl = document.getElementById('feed-visits');
 
   function setStatus(msg, isError){
     statusEl.textContent = msg || '';
@@ -798,7 +800,28 @@
       modLabelEl.textContent = user.isAnonymous ? '' : 'Signed in as ' + user.email + (isMod ? '' : ' (not a moderator)') + '.';
       modBtn.textContent = user.isAnonymous ? 'Moderator sign-in' : 'Sign out';
       redraw();
+      showVisits();
     });
+
+    // Moderators see the anonymous visitor count (see assets/visits.js).
+    async function showVisits(){
+      visitsEl.hidden = true;
+      if(!isMod) return;
+      try{
+        var snap = await fs.getDocs(fs.query(fs.collection(db, 'visits'), fs.orderBy(fs.documentId(), 'desc'), fs.limit(30)));
+        var todayId = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Phoenix', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
+        var today = 0, week = 0, month = 0;
+        snap.docs.forEach(function(d){
+          var n = d.data().n || 0;
+          var age = (Date.parse(todayId) - Date.parse(d.id)) / 86400000;
+          if(age < 1) today += n;
+          if(age < 7) week += n;
+          if(age < 30) month += n;
+        });
+        visitsEl.textContent = 'Visitors today: ' + today + ' · last 7 days: ' + week + ' · last 30 days: ' + month + ' (each device counted once a day)';
+        visitsEl.hidden = false;
+      }catch(err){ console.error(err); }
+    }
 
     // The moderator link only shows when the page is opened with #moderate,
     // so regular members don't see it.
@@ -884,6 +907,7 @@
     });
   }
 </script>
+<script src="../assets/visits.js" defer></script>
 
 </body>
 </html>

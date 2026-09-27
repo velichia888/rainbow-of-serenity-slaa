@@ -43,3 +43,14 @@ in the Firebase console after changing them).
 
 You can also remove a post from **Firestore Database → Data → feed** in the
 Firebase console.
+
+## Visitor count
+
+`assets/visits.js` (loaded by the home page and the app) adds 1 to a daily
+total in Firestore (`visits/YYYY-MM-DD`) the first time a device opens the site
+each day, Arizona time. It sets no cookies and stores nothing about the
+visitor; the only thing kept on the device is the date it was last counted.
+The rules let visitors add 1 and nothing else, and only moderators can read the
+totals. Moderators see "today / last 7 days / last 30 days" at the bottom of the
+Community tab after signing in, and the daily numbers are also under
+**Firestore Database → Data → visits** in the Firebase console.
