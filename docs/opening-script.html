@@ -46,6 +46,23 @@
     margin-top:32px; font-size:0.88rem; color:var(--ink-soft);
   }
   .note a{color:var(--accent);}
+  .pause{
+    font-family:"IBM Plex Mono",monospace; font-size:0.72rem;
+    font-style:italic; color:var(--ink-soft); margin:6px 0 0 16px;
+  }
+  .roles{
+    display:grid; gap:10px; margin:10px 0 0;
+  }
+  .roles div{
+    display:flex; align-items:baseline; gap:8px; font-size:0.92rem;
+  }
+  .roles span{
+    font-family:"IBM Plex Mono",monospace; font-size:0.78rem;
+    color:var(--ink-soft); min-width:88px;
+  }
+  .fill-line{
+    flex:1; border-bottom:1px dashed var(--line); min-width:120px; height:1.3em;
+  }
   @media print{ .no-print{display:none;} body{padding:0;} }
 </style>
 </head>
@@ -54,6 +71,15 @@
   <p class="no-print"><a class="back" href="../index.html">&larr; Back to Rainbow of Serenity</a></p>
   <span class="eyebrow">Rainbow of Serenity · SLAA</span>
   <h1>Chairperson's Opening Script</h1>
+
+  <h2>Today's roles</h2>
+  <div class="roles">
+    <div><span>Chair</span><span class="fill-line"></span></div>
+    <div><span>Greeter</span><span class="fill-line"></span></div>
+    <div><span>Reader</span><span class="fill-line"></span></div>
+    <div><span>Timer</span><span class="fill-line"></span></div>
+    <div><span>Tech host</span><span class="fill-line"></span></div>
+  </div>
 
   <h2>1. Welcome</h2>
   <p class="cue">Say:</p>
@@ -65,7 +91,8 @@
   <p class="cue">Say:</p>
   <div class="say">
     <p>"Let's open with a moment of silence, followed by the Serenity Prayer."</p>
-    <p>God, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference.</p>
+    <p class="pause">(pause — silence, about 10 seconds)</p>
+    <p style="margin-top:10px;">Higher Power, grant me the serenity to accept the things I cannot change, courage to change the things I can, and wisdom to know the difference.</p>
   </div>
 
   <h2>3. Who this meeting is for</h2>
@@ -84,12 +111,14 @@
   <p class="cue">Say:</p>
   <div class="say">
     <p>"This week is our [step study / Big Book reading / speaker / open + activity] meeting. Can I get a volunteer to read [the step / the tradition / the passage] for this week?"</p>
+    <p class="pause">(pause for a volunteer, then let them read)</p>
   </div>
 
   <h2>6. Member introductions (4 min)</h2>
   <p class="cue">Say:</p>
   <div class="say">
     <p>"Let's go around — first name only, and 'sex and/or love addict' if that fits for you. I'll start: [name], sex and/or love addict."</p>
+    <p class="pause">(pause — go around, one at a time)</p>
     <p style="margin-top:8px; font-size:0.85rem; color:var(--ink-soft);">If the group is large, trim this to name-only to protect sharing time.</p>
   </div>
 
