@@ -212,6 +212,8 @@
     background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
   }
   nav.tabbar svg{width:19px; height:19px;}
+  nav.tabbar button{white-space:nowrap; min-width:0; padding-left:0; padding-right:0; font-size:0.64rem;}
+  @media (max-width:360px){ nav.tabbar button{font-size:0.56rem;} }
 
   /* iOS Safari zooms into any field under 16px and doesn't zoom back out. */
   input[type], textarea{font-size:16px;}
@@ -323,6 +325,90 @@
     background:var(--card); border-radius:8px; padding:10px 12px;
     font-size:0.85rem; margin:0 0 16px;
   }
+
+  /* Step work journal: private, saved only on this device. */
+  .step-picker{
+    display:grid; grid-template-columns:repeat(6,1fr); gap:10px 6px;
+  }
+  .step-pick{
+    aspect-ratio:1; width:100%; max-width:46px; justify-self:center;
+    border-radius:50%; border:2px solid var(--line); background:var(--bg);
+    color:var(--ink); font:600 1rem "Fraunces",Georgia,serif; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; padding:0;
+  }
+  .step-pick.has-notes{
+    background-image:linear-gradient(var(--bg-raised),var(--bg-raised)),
+      linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+    background-origin:border-box; background-clip:padding-box, border-box;
+    border-color:transparent;
+  }
+  .step-pick[aria-pressed="true"]{
+    background:var(--accent); background-image:none; border-color:var(--accent); color:var(--accent-ink);
+  }
+  .step-key{font-size:0.78rem; color:var(--ink-soft); margin:12px 0 0;}
+  .step-key .dot{
+    display:inline-block; width:10px; height:10px; border-radius:50%; vertical-align:-1px; margin-right:4px;
+    background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+  }
+  .step-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:14px;}
+  .step-title{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.25rem; margin:0;}
+  .step-principle{
+    font-family:"IBM Plex Mono",monospace; font-size:0.68rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); white-space:nowrap;
+  }
+  .step-q{margin-bottom:18px;}
+  .step-q label{
+    font-family:"Work Sans",sans-serif; font-size:0.95rem; text-transform:none;
+    letter-spacing:0; color:var(--ink); margin-bottom:8px; line-height:1.4;
+  }
+  .step-q textarea{min-height:96px;}
+  .step-foot{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .step-saved{font-size:0.82rem; color:var(--ink-soft); margin:0; min-height:1.2em;}
+  .step-saved.error{color:#c0392b;}
+  .link-btn{
+    background:none; border:none; padding:0; font:inherit; font-size:0.82rem;
+    color:var(--ink-soft); text-decoration:underline; cursor:pointer;
+  }
+
+  /* Share as image: made on the phone, nothing uploaded. */
+  .share-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--bg-raised); color:var(--ink);
+    border:1px solid var(--line); border-radius:999px;
+    padding:8px 16px; margin-top:12px; cursor:pointer;
+    font:600 0.85rem "Work Sans",-apple-system,sans-serif;
+  }
+  .share-btn svg{width:15px; height:15px;}
+  .share-row{text-align:center;}
+  .entry-share{
+    float:right; background:none; border:1px solid var(--line); border-radius:999px;
+    padding:2px 10px; font:600 0.75rem "Work Sans",sans-serif; color:var(--ink-soft); cursor:pointer;
+  }
+  .celebrate-share{
+    width:100%; padding:11px; margin-top:10px; border-radius:999px;
+    background:transparent; color:var(--ink); border:1px solid var(--line);
+    font:600 0.95rem "Work Sans",-apple-system,sans-serif; cursor:pointer;
+  }
+  .share-sheet{
+    position:fixed; inset:0; z-index:950;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px; background:rgba(28,26,32,0.5);
+    animation:cel-fade 0.25s ease-out;
+  }
+  .share-sheet[hidden]{display:none;}
+  .share-card{
+    width:100%; max-width:360px; max-height:100%; overflow-y:auto;
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:20px;
+    padding:20px; box-shadow:0 12px 40px rgba(0,0,0,0.25);
+  }
+  .share-card h2{font-size:1.2rem; margin:0 0 12px;}
+  .share-preview{
+    display:block; width:100%; max-width:230px; margin:0 auto 14px;
+    border-radius:12px; border:1px solid var(--line); aspect-ratio:4/5; background:var(--bg);
+  }
+  .share-actions{display:flex; gap:8px; margin-top:4px;}
+  .share-actions .btn{flex:1; margin-top:10px; padding:12px 10px;}
+  .share-note{font-size:0.78rem; color:var(--ink-soft); margin:12px 0 0; text-align:center;}
 </style>
 <link rel="stylesheet" href="../assets/ui.css">
 </head>
@@ -361,6 +447,7 @@
         </div>
       </div>
       <p class="milestone-note" id="milestone-note"></p>
+      <div class="share-row" id="milestone-share-row" hidden><button type="button" class="share-btn" id="milestone-share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg> Share as an image</button></div>
     </div>
     <h2 style="margin-top:28px; font-size:1.1rem;">Your chip case</h2>
     <div class="card">
@@ -399,6 +486,29 @@
     <div class="card" id="grat-list"></div>
     <h2 style="margin-top:28px; font-size:1.1rem;">Recent entries</h2>
     <div class="card" id="entries-list"></div>
+  </section>
+
+  <section class="panel" id="panel-steps">
+    <h2>Step work journal</h2>
+    <p class="lede">Write your answers to reflection questions, step by step. Saved only on this phone, never shared or uploaded, and it works offline.</p>
+    <p class="storage-note" data-storage-note hidden></p>
+    <div class="card">
+      <label>Choose a step</label>
+      <div class="step-picker" id="step-picker" role="group" aria-label="Steps"></div>
+      <p class="step-key"><span class="dot"></span> means you've written something for that step.</p>
+    </div>
+    <div class="card" id="step-card">
+      <div class="step-head">
+        <h3 class="step-title" id="step-title">Step 1</h3>
+        <span class="step-principle" id="step-principle"></span>
+      </div>
+      <div id="step-questions"></div>
+      <div class="step-foot">
+        <p class="step-saved" id="step-saved" role="status"></p>
+        <button type="button" class="link-btn" id="step-clear">Erase this step</button>
+      </div>
+    </div>
+    <p class="lede" style="font-size:0.85rem;">These questions were written for this app as a gentle starting point. Work the steps with your sponsor and SLAA literature. <a href="../docs/twelve-steps.html">Read the Twelve Steps →</a></p>
   </section>
 
   <section class="panel" id="panel-affirm">
@@ -482,6 +592,10 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
     Check-In
   </button>
+  <button class="tab-btn" data-panel="panel-steps">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 20h5v-5h5v-5h5V5h3"/></svg>
+    Steps
+  </button>
   <button class="tab-btn" data-panel="panel-affirm">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z"/></svg>
     Affirm
@@ -507,7 +621,21 @@
     <h2 class="celebrate-title" id="celebrate-title">30 Days</h2>
     <p class="celebrate-msg" id="celebrate-msg"></p>
     <button type="button" class="celebrate-close" id="celebrate-close">Thank you</button>
+    <button type="button" class="celebrate-share" id="celebrate-share">Share as an image</button>
     <p class="celebrate-note">Just for you. Only this device knows.</p>
+  </div>
+</div>
+<div class="share-sheet" id="share-sheet" role="dialog" aria-modal="true" aria-labelledby="share-title" hidden>
+  <div class="share-card">
+    <h2 id="share-title">Share as an image</h2>
+    <img class="share-preview" id="share-preview" alt="Preview of the image you can share">
+    <label for="share-name">Add your first name (optional)</label>
+    <input type="text" id="share-name" maxlength="24" placeholder="Leave blank to stay anonymous" autocomplete="off">
+    <div class="share-actions">
+      <button type="button" class="btn secondary" id="share-cancel">Close</button>
+      <button type="button" class="btn" id="share-go">Share</button>
+    </div>
+    <p class="share-note" id="share-note">Made right here on your phone. Nothing is uploaded, and the image doesn't mention SLAA.</p>
   </div>
 </div>
 <script>
@@ -551,6 +679,11 @@
     var chipEmojiEl = document.getElementById('chip-emoji');
     var chipLabelEl = document.getElementById('chip-label');
     var chipGridEl = document.getElementById('chip-grid');
+    var shareRow = document.getElementById('milestone-share-row');
+    var shareData = null;
+    document.getElementById('milestone-share').addEventListener('click', function(){
+      if(shareData && window.rosShare) window.rosShare.milestone(shareData);
+    });
 
     var milestones = [
       {days:1, label:'24 Hours', emoji:'🌱'},
@@ -576,7 +709,7 @@
     }
 
     function render(dateStr){
-      if(!dateStr){ display.hidden = true; noteEl.textContent = ''; chipGridEl.innerHTML = ''; return; }
+      if(!dateStr){ display.hidden = true; noteEl.textContent = ''; chipGridEl.innerHTML = ''; shareRow.hidden = true; return; }
       var start = new Date(dateStr + 'T00:00:00');
       var today = new Date();
       today.setHours(0,0,0,0);
@@ -603,6 +736,10 @@
       } else {
         noteEl.textContent = 'Every day counts.';
       }
+
+      shareData = {days:days, emoji:current ? current.emoji : '🌱', label:current ? current.label : '',
+        message:current ? messages[current.days] : 'Every day counts.'};
+      shareRow.hidden = days < 1;
 
       renderChipGrid(days);
       maybeCelebrate(dateStr, earned);
@@ -658,6 +795,10 @@
 
     function hideCelebration(){ celEl.hidden = true; }
     celClose.addEventListener('click', hideCelebration);
+    document.getElementById('celebrate-share').addEventListener('click', function(){
+      hideCelebration();
+      if(shareData && window.rosShare) window.rosShare.milestone(shareData);
+    });
     celEl.addEventListener('click', function(e){ if(e.target === celEl) hideCelebration(); });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !celEl.hidden) hideCelebration(); });
 
@@ -701,13 +842,20 @@
         listEl.innerHTML = '<p class="empty-note">No entries yet — your first check-in will show up here.</p>';
         return;
       }
-      listEl.innerHTML = entries.slice().reverse().map(function(entry){
-        return '<div class="entry"><span class="entry-date">' + entry.date + '</span>' +
+      listEl.innerHTML = entries.map(function(entry, i){
+        return '<div class="entry"><button type="button" class="entry-share" data-i="' + i + '" aria-label="Share this check-in as an image">Share</button>' +
+          '<span class="entry-date">' + entry.date + '</span>' +
           (entry.mood ? '<span class="entry-mood">' + entry.mood + '</span>' : '') +
           (entry.text ? '<p class="entry-text">' + entry.text.replace(/</g,'&lt;') + '</p>' : '') +
           '</div>';
-      }).join('');
+      }).reverse().join('');
     }
+    listEl.addEventListener('click', function(e){
+      var b = e.target.closest('.entry-share');
+      if(!b || !window.rosShare) return;
+      var entry = loadEntries()[+b.dataset.i];
+      if(entry) window.rosShare.checkin(entry);
+    });
 
     saveBtn.addEventListener('click', function(){
       var text = textEl.value.trim();
@@ -1169,6 +1317,354 @@
       }
     });
   }
+</script>
+<script>
+  // Step work journal. Answers live only in this browser's storage
+  // (localStorage 'ros_step_journal'), like check-ins. The questions are
+  // our own general reflections, not SLAA's copyrighted step questions.
+  (function(){
+    var STEPS = [
+      {p:'Honesty', q:[
+        'What brought me to the program? Describe a few moments, as honestly as I can.',
+        'What have I tried on my own to change these patterns, and how did it go?',
+        'What am I ready to admit today that I could not admit before?']},
+      {p:'Hope', q:[
+        'Where have I seen hope or real change in other people in the rooms?',
+        'In my own words, what could a power greater than myself mean to me right now?',
+        'What would a calmer, saner, more peaceful life look like for me day to day?']},
+      {p:'Faith', q:[
+        'What am I holding onto most tightly, and what would it feel like to loosen my grip?',
+        'What is one small way I can practice trust today?',
+        'Write a few words of your own to start each day with.']},
+      {p:'Courage', q:[
+        'What resentments am I carrying? Who or what, and why does it still hurt?',
+        'What fears keep coming back?',
+        'Looking at my relationships, where have I been hurt, and where have I caused harm?',
+        'What strengths and good qualities do I see in myself too?']},
+      {p:'Integrity', q:[
+        'Who is a safe, trusted person I could share this with? What do I need to feel ready?',
+        'What am I most afraid to say out loud?',
+        'After sharing, what did I notice or feel?']},
+      {p:'Willingness', q:[
+        'Which patterns or character defects keep showing up in what I wrote?',
+        'What do these patterns give me, and what do they cost me?',
+        'Who might I be without them?']},
+      {p:'Humility', q:[
+        'What does humility mean to me, and how is it different from shame?',
+        'Where can I ask for help today?',
+        'What small change have I noticed in myself lately?']},
+      {p:'Love', q:[
+        'Who have I harmed? I can include myself if I belong on the list.',
+        'What gets in the way of my willingness with each person?',
+        'In general terms, what might setting things right look like?']},
+      {p:'Justice', q:[
+        'Which amends feel ready, and which need more guidance from my sponsor first?',
+        'Could any amends hurt someone else? How will I be careful?',
+        'After an amends: what happened, and how do I feel now?',
+        'How will I show up differently from here on?']},
+      {p:'Perseverance', q:[
+        'Looking back on today, where did I struggle, and where did I do well?',
+        'Is there anything I need to set right soon?',
+        'What am I grateful for tonight?']},
+      {p:'Spiritual awareness', q:[
+        'What does prayer, meditation, or quiet time look like for me right now?',
+        'When did I feel connected or at peace this week?',
+        'What do I sense I am being guided toward?']},
+      {p:'Service', q:[
+        'How has my life changed since I started this work?',
+        'How could I be of service to the group or to a newcomer?',
+        'Where can I practice these principles at home, at work, and in my relationships?']}
+    ];
+    var KEY = 'ros_step_journal';
+    var picker = document.getElementById('step-picker');
+    var titleEl = document.getElementById('step-title');
+    var principleEl = document.getElementById('step-principle');
+    var qEl = document.getElementById('step-questions');
+    var savedEl = document.getElementById('step-saved');
+    var clearBtn = document.getElementById('step-clear');
+    var current = 0, timer = null;
+
+    function load(){
+      try{ return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }catch(e){ return {}; }
+    }
+    function save(data){
+      try{ localStorage.setItem(KEY, JSON.stringify(data)); return true; }catch(e){ return false; }
+    }
+    function hasNotes(entry){
+      return !!(entry && entry.a && entry.a.some(function(t){ return t && t.trim(); }));
+    }
+    function whenText(ts){
+      if(!ts) return '';
+      var d = new Date(ts);
+      if(d.toDateString() === new Date().toDateString())
+        return 'today at ' + d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+      return d.toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+    }
+    function renderPicker(){
+      var data = load();
+      picker.innerHTML = '';
+      STEPS.forEach(function(s, i){
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'step-pick' + (hasNotes(data[i + 1]) ? ' has-notes' : '');
+        b.textContent = i + 1;
+        b.setAttribute('aria-pressed', i === current ? 'true' : 'false');
+        b.setAttribute('aria-label', 'Step ' + (i + 1) + ', ' + s.p);
+        b.addEventListener('click', function(){ flush(); current = i; try{ localStorage.setItem('ros_step_current', String(i)); }catch(e){} render(); });
+        picker.appendChild(b);
+      });
+    }
+    function setSaved(entry){
+      savedEl.classList.remove('error');
+      savedEl.textContent = hasNotes(entry) ? 'Saved on this phone, ' + whenText(entry.at) + '.' : '';
+    }
+    function render(){
+      var s = STEPS[current], entry = load()[current + 1] || {a:[]};
+      titleEl.textContent = 'Step ' + (current + 1);
+      principleEl.textContent = s.p;
+      qEl.innerHTML = '';
+      s.q.forEach(function(q, i){
+        var wrap = document.createElement('div');
+        wrap.className = 'step-q';
+        var id = 'step-q-' + i;
+        var lab = document.createElement('label');
+        lab.htmlFor = id;
+        lab.textContent = q;
+        var ta = document.createElement('textarea');
+        ta.id = id;
+        ta.placeholder = 'Write as much or as little as you like...';
+        ta.value = entry.a[i] || '';
+        ta.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(flush, 500); });
+        ta.addEventListener('blur', flush);
+        wrap.appendChild(lab);
+        wrap.appendChild(ta);
+        qEl.appendChild(wrap);
+      });
+      clearBtn.hidden = !hasNotes(entry);
+      setSaved(entry);
+      renderPicker();
+    }
+    function flush(){
+      clearTimeout(timer); timer = null;
+      var answers = Array.prototype.map.call(qEl.querySelectorAll('textarea'), function(t){ return t.value; });
+      var data = load(), prev = data[current + 1] || {a:[]};
+      if(answers.join('\u0000') === (prev.a || []).join('\u0000')) return;
+      var entry = {a:answers, at:Date.now()};
+      if(hasNotes(entry)) data[current + 1] = entry; else delete data[current + 1];
+      if(!save(data)){
+        savedEl.classList.add('error');
+        savedEl.textContent = "Couldn't save on this device. Your words are still here, so you can copy them somewhere safe.";
+        return;
+      }
+      clearBtn.hidden = !hasNotes(entry);
+      setSaved(entry);
+      renderPicker();
+    }
+    clearBtn.addEventListener('click', function(){
+      if(!confirm('Erase everything you wrote for Step ' + (current + 1) + '? This can\'t be undone.')) return;
+      var data = load();
+      delete data[current + 1];
+      save(data);
+      render();
+    });
+    // Save anything typed before the tab is closed or the phone locks.
+    document.addEventListener('visibilitychange', function(){ if(document.hidden) flush(); });
+    window.addEventListener('pagehide', flush);
+    try{ current = Math.min(11, Math.max(0, parseInt(localStorage.getItem('ros_step_current') || '0', 10) || 0)); }catch(e){}
+    render();
+  })();
+
+  // Share a milestone or check-in as an image. The picture is drawn on this
+  // phone with a canvas and handed to the phone's own share sheet; nothing is
+  // uploaded and nothing is saved. A name appears only if the member types one.
+  (function(){
+    var sheet = document.getElementById('share-sheet');
+    var preview = document.getElementById('share-preview');
+    var nameInput = document.getElementById('share-name');
+    var goBtn = document.getElementById('share-go');
+    var noteEl = document.getElementById('share-note');
+    var NOTE = noteEl.textContent;
+    var RAINBOW = ['#e5384c','#f2994a','#dfb400','#27ae60','#2f80ed','#9b51e0'];
+    var W = 1080, H = 1350;
+    var item = null, file = null, url = null, timer = null, opener = null;
+    var EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+
+    function colors(){
+      var cs = getComputedStyle(document.documentElement);
+      function v(n, d){ return (cs.getPropertyValue(n) || '').trim() || d; }
+      return {bg:v('--bg','#fffaf3'), raised:v('--bg-raised','#ffffff'), ink:v('--ink','#3a3a3a'),
+        soft:v('--ink-soft','#8f8f8f'), line:v('--line','#f0ddc4'), teal:v('--teal','#0fa38f'), card:v('--card','#fef1de')};
+    }
+    function rainbow(ctx, x0, x1){
+      var g = ctx.createLinearGradient(x0, 0, x1, 0);
+      RAINBOW.forEach(function(c, i){ g.addColorStop(i / (RAINBOW.length - 1), c); });
+      return g;
+    }
+    function wrap(ctx, text, maxW){
+      var lines = [];
+      text.split(/\n+/).forEach(function(para){
+        var words = para.split(/\s+/).filter(Boolean), line = '';
+        words.forEach(function(w){
+          // Break very long words so they never run off the edge.
+          while(ctx.measureText(w).width > maxW){
+            var n = w.length - 1;
+            while(n > 1 && ctx.measureText(w.slice(0, n)).width > maxW) n--;
+            if(line){ lines.push(line); line = ''; }
+            lines.push(w.slice(0, n)); w = w.slice(n);
+          }
+          var test = line ? line + ' ' + w : w;
+          if(ctx.measureText(test).width > maxW && line){ lines.push(line); line = w; }
+          else line = test;
+        });
+        if(line) lines.push(line);
+      });
+      return lines;
+    }
+    // Fits text into a box, shrinking the size until it does.
+    function fitText(ctx, text, font, maxW, maxH, big, small, lh){
+      for(var size = big; size >= small; size -= 2){
+        ctx.font = font(size);
+        var lines = wrap(ctx, text, maxW);
+        if(lines.length * size * lh <= maxH) return {lines:lines, size:size};
+      }
+      ctx.font = font(small);
+      var all = wrap(ctx, text, maxW), max = Math.floor(maxH / (small * lh));
+      if(all.length > max){ all = all.slice(0, max); all[max - 1] = all[max - 1].replace(/\s*\S*$/, '') + '…'; }
+      return {lines:all, size:small};
+    }
+    function ring(ctx, c, cx, cy, r, emoji){
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = rainbow(ctx, cx - r, cx + r); ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, r - 14, 0, Math.PI * 2);
+      ctx.fillStyle = c.raised; ctx.fill();
+      ctx.font = Math.round(r * 1.05) + 'px ' + EMOJI;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(emoji, cx, cy + r * 0.06);
+    }
+    function mono(ctx, c, text, y, size, color){
+      ctx.font = '600 ' + size + 'px "IBM Plex Mono",ui-monospace,monospace';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = color;
+      if('letterSpacing' in ctx) ctx.letterSpacing = Math.round(size * 0.14) + 'px';
+      ctx.fillText(text.toUpperCase(), W / 2, y);
+      if('letterSpacing' in ctx) ctx.letterSpacing = '0px';
+    }
+    function frame(ctx, c, name){
+      ctx.fillStyle = c.bg; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = rainbow(ctx, 0, W); ctx.fillRect(0, 0, W, 22);
+      // A soft card behind the content, like the app's cards.
+      ctx.fillStyle = c.raised; ctx.strokeStyle = c.line; ctx.lineWidth = 3;
+      ctx.beginPath();
+      if(ctx.roundRect) ctx.roundRect(60, 82, W - 120, H - 230, 40); else ctx.rect(60, 82, W - 120, H - 230);
+      ctx.fill(); ctx.stroke();
+      if(name){
+        ctx.font = '600 44px "Work Sans",-apple-system,sans-serif';
+        ctx.fillStyle = c.ink; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.fillText('— ' + name, W / 2, H - 200);
+      }
+      mono(ctx, c, 'One day at a time  ·  Rainbow of Serenity', H - 72, 26, c.soft);
+    }
+    function drawMilestone(ctx, c, m, name){
+      frame(ctx, c, name);
+      mono(ctx, c, m.days === 1 ? 'One day at a time' : 'Celebrating', 190, 32, c.teal);
+      ring(ctx, c, W / 2, 400, 150, m.emoji);
+      // The day count in the app's rainbow lettering.
+      var num = String(m.days);
+      ctx.font = '600 210px "Fraunces",Georgia,serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+      var nw = ctx.measureText(num).width;
+      ctx.fillStyle = rainbow(ctx, W / 2 - nw / 2, W / 2 + nw / 2);
+      ctx.fillText(num, W / 2, 790);
+      mono(ctx, c, (m.days === 1 ? 'day' : 'days') + (m.label ? '  ·  ' + m.label + ' chip' : ''), 855, 30, c.soft);
+      var t = fitText(ctx, m.message, function(s){ return 'italic 500 ' + s + 'px "Fraunces",Georgia,serif'; },
+        W - 260, name ? 190 : 250, 50, 32, 1.35);
+      ctx.fillStyle = c.ink;
+      t.lines.forEach(function(l, i){ ctx.fillText(l, W / 2, 950 + t.size + i * t.size * 1.35); });
+    }
+    function drawCheckin(ctx, c, e, name){
+      frame(ctx, c, name);
+      mono(ctx, c, 'My check-in', 190, 32, c.teal);
+      mono(ctx, c, e.date || '', 240, 28, c.soft);
+      var top = 300;
+      if(e.mood){ ring(ctx, c, W / 2, 440, 120, e.mood); top = 610; }
+      var text = e.text || 'Checking in, one day at a time.';
+      var boxH = (name ? H - 290 : H - 220) - top;
+      var t = fitText(ctx, '“' + text + '”', function(s){ return 'italic 500 ' + s + 'px "Fraunces",Georgia,serif'; },
+        W - 260, boxH, 64, 30, 1.35);
+      var blockH = t.lines.length * t.size * 1.35;
+      var y = top + Math.max(0, (boxH - blockH) / 2) + t.size;
+      ctx.fillStyle = c.ink; ctx.textAlign = 'center';
+      t.lines.forEach(function(l, i){ ctx.fillText(l, W / 2, y + i * t.size * 1.35); });
+    }
+    var fontsLoaded = false, allFonts = null;
+    function fontsReady(){
+      if(!document.fonts || !document.fonts.load) return Promise.resolve();
+      if(!allFonts){
+        allFonts = Promise.all(['600 100px "Fraunces"', 'italic 500 50px "Fraunces"', '600 30px "IBM Plex Mono"', '600 40px "Work Sans"']
+          .map(function(f){ return document.fonts.load(f).catch(function(){}); }))
+          .then(function(){ fontsLoaded = true; });
+      }
+      // Offline, the fonts may not come; draw with the fallbacks after a
+      // moment, and redraw if they arrive while the preview is still open.
+      if(!fontsLoaded) allFonts.then(function(){ if(item) build(); });
+      return Promise.race([allFonts, new Promise(function(r){ setTimeout(r, 1500); })]);
+    }
+    function build(){
+      var mine = item, name = nameInput.value.trim();
+      file = null; goBtn.disabled = true;
+      return fontsReady().then(function(){
+        if(mine !== item) return;
+        var canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        var ctx = canvas.getContext('2d'), c = colors();
+        if(item.kind === 'milestone') drawMilestone(ctx, c, item.data, name);
+        else drawCheckin(ctx, c, item.data, name);
+        canvas.toBlob(function(blob){
+          if(!blob || mine !== item) return;
+          file = new File([blob], item.kind === 'milestone' ? 'my-milestone.png' : 'my-check-in.png', {type:'image/png'});
+          if(url) URL.revokeObjectURL(url);
+          url = URL.createObjectURL(blob);
+          preview.src = url;
+          goBtn.disabled = false;
+        }, 'image/png');
+      });
+    }
+    function open(kind, data){
+      opener = document.activeElement;
+      item = {kind:kind, data:data};
+      nameInput.value = '';
+      noteEl.textContent = NOTE;
+      preview.removeAttribute('src');
+      sheet.hidden = false;
+      goBtn.focus();
+      build();
+    }
+    function close(){
+      sheet.hidden = true; item = null; file = null;
+      if(url){ URL.revokeObjectURL(url); url = null; }
+      if(opener && opener.focus) opener.focus();
+    }
+    nameInput.addEventListener('input', function(){ clearTimeout(timer); timer = setTimeout(build, 300); });
+    goBtn.addEventListener('click', function(){
+      if(!file) return;
+      if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+        navigator.share({files:[file]}).catch(function(){});
+        return;
+      }
+      // No share sheet (most desktop browsers): download the picture instead.
+      var a = document.createElement('a');
+      a.href = url; a.download = file.name;
+      document.body.appendChild(a); a.click(); a.remove();
+      noteEl.textContent = 'Saved to your downloads. You can also press and hold the picture to save it.';
+    });
+    document.getElementById('share-cancel').addEventListener('click', close);
+    sheet.addEventListener('click', function(e){ if(e.target === sheet) close(); });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !sheet.hidden) close(); });
+
+    window.rosShare = {
+      milestone:function(m){ open('milestone', m); },
+      checkin:function(e){ open('checkin', e); }
+    };
+  })();
 </script>
 <script src="../assets/visits.js" defer></script>
 <script>
