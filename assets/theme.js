@@ -10,7 +10,7 @@
     root.classList.toggle('dark', dark);
     root.setAttribute('data-theme', pref);
     var metas = document.querySelectorAll('meta[name="theme-color"]');
-    for(var i = 0; i < metas.length; i++){ metas[i].removeAttribute('media'); metas[i].setAttribute('content', dark ? '#1c1a20' : '#fffaf3'); }
+    for(var i = 0; i < metas.length; i++){ metas[i].removeAttribute('media'); metas[i].setAttribute('content', dark ? '#1f1a16' : '#fffaf3'); }
   }
   window.rosTheme = {
     get: saved,

@@ -2,45 +2,26 @@
    button, and the next-meeting strip. Loaded after each page's own styles. */
 
 /* Dark mode: assets/theme.js adds class "dark" from the phone setting or
-   the member's choice on the theme button. */
+   the member's choice on the theme button. Same design and accent colors as
+   light mode; only the warm cream backgrounds and text turn dark. */
 html.dark{
-  --bg:#1c1a20;
-  --bg-raised:#26232b;
-  --ink:#ece6dd;
-  --ink-soft:#a9a29a;
-  --line:#3b3640;
-  --accent:#ff7d62;
-  --accent-ink:#1c1a20;
-  --teal:#4fcfba;
-  --card:#2c2830;
-  --focus:#ece6dd;
-  --rainbow:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+  --bg:#1f1a16;
+  --bg-raised:#2a241e;
+  --ink:#f3ebe0;
+  --ink-soft:#b3a797;
+  --line:#4a3d30;
+  --card:#3a2d20;
+  --focus:#f3ebe0;
   color-scheme:dark;
 }
-/* The logo artwork has dark lettering, so it sits on a cream badge. */
+/* The logo artwork has dark lettering, so it sits on its cream background. */
 html.dark .hero-logo img{background:#fffaf3; border-radius:18px; padding:14px 10px 6px;}
 html.dark img[src$="logo-icon.svg"]{background:#fffaf3; border-radius:50%;}
-
-/* On a dark background the site's small rainbow touches got lost, so
-   dark mode gives them more presence. */
-html.dark header.top{border-bottom:0; padding-bottom:14px;}
-html.dark header.top::after{
-  content:""; position:absolute; left:0; right:0; bottom:0; height:4px; background:var(--rainbow);
-}
+/* The pride bar is see-through over cream in light mode; use those same
+   blended colors so it looks identical on dark. */
 html.dark .callout-pride::before{
-  width:5px;
-  background:linear-gradient(180deg,#e5384c,#f2994a,#f2c94c,#27ae60,#2f80ed,#9b51e0);
+  background:linear-gradient(180deg,#ef8286,#f7bc85,#f7d986,#7dc992,#82ade7,#c391df);
 }
-html.dark .basics-card, html.dark .resource-card, html.dark .join, html.dark .next-meeting{
-  position:relative; overflow:hidden;
-}
-html.dark .basics-card::before, html.dark .resource-card:not(.crisis-card)::before, html.dark .join::before, html.dark .next-meeting::before{
-  content:""; position:absolute; top:0; left:0; right:0; height:3px; background:var(--rainbow);
-}
-html.dark .icon-divider::before{background:linear-gradient(90deg,transparent,#e5384c,#f2994a,#dfb400);}
-html.dark .icon-divider::after{background:linear-gradient(90deg,#27ae60,#2f80ed,#9b51e0,transparent);}
-html.dark .icon-divider .mark{width:26px; height:26px;}
-html.dark .back-row{padding-bottom:12px; border-bottom:3px solid; border-image:var(--rainbow) 1;}
 
 /* Theme button: Auto (follow the phone), Light, Dark. */
 .theme-btn{
@@ -54,6 +35,7 @@ html.dark .back-row{padding-bottom:12px; border-bottom:3px solid; border-image:v
 .theme-btn:hover{border-color:var(--accent);}
 nav.top-nav .theme-btn{margin-left:auto;}
 .app-header .theme-btn{margin-left:auto; min-height:36px;}
+.app-header .theme-btn span{display:inline; font:inherit; text-transform:none; letter-spacing:0; color:inherit;}
 .app-header .theme-btn + .text-size-btn{margin-left:8px;}
 .back-row{display:flex; align-items:center; justify-content:space-between; gap:10px;}
 
@@ -72,7 +54,7 @@ body:not(.has-tabbar){padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px
 .quick-exit:hover{background:#000;}
 .quick-exit:focus-visible{outline:2px solid var(--accent,#ff6a4d); outline-offset:3px;}
 .has-tabbar .quick-exit{bottom:calc(86px + env(safe-area-inset-bottom, 0px));}
-html.dark .quick-exit{background:#ece6dd; color:#1c1a20;}
+html.dark .quick-exit{background:#f3ebe0; color:#1f1a16;}
 html.dark .quick-exit:hover{background:#fff;}
 
 /* Next meeting strip */
