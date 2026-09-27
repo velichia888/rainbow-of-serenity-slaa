@@ -12,6 +12,10 @@
 <link rel="icon" type="image/svg+xml" href="../assets/logo-icon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<script>
+  // Apply the saved text size before the page draws, so it doesn't jump.
+  try{ if(localStorage.getItem('ros_large_text') === '1') document.documentElement.classList.add('large-text'); }catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -277,6 +281,47 @@
     .celebrate, .celebrate-card, .celebrate-card .chip-circle{animation:none;}
     .sparkle{display:none;}
   }
+
+  /* Larger text option: everything sized in rem grows with this. */
+  html.large-text{font-size:118.75%;}
+  html.large-text input[type], html.large-text textarea{font-size:19px;}
+  html.large-text nav.tabbar button{font-size:0.6rem; white-space:nowrap;}
+  .text-size-btn{
+    margin-left:auto; flex-shrink:0;
+    display:flex; align-items:baseline; gap:1px;
+    background:var(--bg-raised); color:var(--ink);
+    border:1px solid var(--line); border-radius:999px;
+    padding:6px 12px; min-height:36px; cursor:pointer;
+    font-family:"Fraunces",Georgia,serif; font-weight:600; line-height:1;
+  }
+  .text-size-btn .small{font-size:13px;}
+  .text-size-btn .big{font-size:19px;}
+  .text-size-btn[aria-pressed="true"]{border-color:var(--accent); color:var(--accent); background:var(--card);}
+
+  .grat-form{display:flex; gap:8px;}
+  .grat-form input{flex:1; min-width:0;}
+  .grat-form .btn{margin-top:0; padding:10px 18px; flex-shrink:0;}
+  .grat-day{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.06em; margin:14px 0 4px;
+  }
+  .grat-day:first-child{margin-top:0;}
+  .grat-list{list-style:none; margin:0; padding:0;}
+  .grat-item{
+    display:flex; align-items:flex-start; gap:10px;
+    padding:8px 0; border-bottom:1px solid var(--line);
+  }
+  .grat-list:last-child .grat-item:last-child{border-bottom:none;}
+  .grat-item::before{content:"✦"; color:var(--teal); flex-shrink:0;}
+  .grat-text{flex:1; margin:0; font-size:0.95rem; overflow-wrap:anywhere;}
+  .grat-remove{
+    background:none; border:none; color:var(--ink-soft); cursor:pointer;
+    font-size:1.1rem; line-height:1; padding:2px 6px;
+  }
+  .offline-note{
+    background:var(--card); border-radius:8px; padding:10px 12px;
+    font-size:0.85rem; margin:0 0 16px;
+  }
 </style>
 <link rel="stylesheet" href="../assets/ui.css">
 </head>
@@ -289,6 +334,7 @@
       <span>Rainbow of Serenity</span>
       <h1>Companion</h1>
     </div>
+    <button type="button" class="text-size-btn" id="text-size-btn" aria-pressed="false" aria-label="Larger text" title="Larger text"><span class="small">A</span><span class="big">A</span></button>
   </div>
   <div class="rainbow-strip"></div>
 </header>
@@ -339,6 +385,17 @@
       <button class="btn" id="save-checkin">Save entry</button>
       <p class="save-error" id="checkin-error" hidden>Couldn't save on this device. Your words are still here, so you can copy them somewhere safe.</p>
     </div>
+    <h2 style="margin-top:28px; font-size:1.1rem;">Gratitude list</h2>
+    <p class="lede" style="margin-bottom:12px;">Jot down anything you're grateful for, as often as you like. Saved only on this phone.</p>
+    <div class="card">
+      <form class="grat-form" id="grat-form">
+        <label for="grat-input" style="position:absolute; left:-9999px;">Something I'm grateful for</label>
+        <input type="text" id="grat-input" maxlength="200" placeholder="I'm grateful for..." autocomplete="off">
+        <button class="btn" type="submit">Add</button>
+      </form>
+      <p class="save-error" id="grat-error" hidden>Couldn't save on this device right now.</p>
+    </div>
+    <div class="card" id="grat-list"></div>
     <h2 style="margin-top:28px; font-size:1.1rem;">Recent entries</h2>
     <div class="card" id="entries-list"></div>
   </section>
@@ -390,6 +447,7 @@
   <section class="panel" id="panel-community">
     <h2>Community</h2>
     <p class="lede">A live, shared feed for the group. No account needed. Use a first name or initial only, and keep what's shared here within our traditions of anonymity.</p>
+    <p class="offline-note" id="feed-offline" hidden>You're offline right now. The community feed will load when you're back online. Everything else in the app still works.</p>
     <div class="card" id="feed-setup" hidden>
       <p style="margin:0;">The community feed isn't switched on yet. In the meantime, reach the group directly:</p>
       <p style="margin-top:12px;"><a href="mailto:rainbowofserenityslaa@gmail.com">rainbowofserenityslaa@gmail.com</a></p>
@@ -672,6 +730,93 @@
   })();
 
   (function(){
+    var btn = document.getElementById('text-size-btn');
+    var root = document.documentElement;
+    function sync(){ btn.setAttribute('aria-pressed', root.classList.contains('large-text') ? 'true' : 'false'); }
+    sync();
+    btn.addEventListener('click', function(){
+      var on = root.classList.toggle('large-text');
+      try{ localStorage.setItem('ros_large_text', on ? '1' : '0'); }catch(e){}
+      sync();
+    });
+  })();
+
+  (function(){
+    var form = document.getElementById('grat-form');
+    var input = document.getElementById('grat-input');
+    var listEl = document.getElementById('grat-list');
+    var errorEl = document.getElementById('grat-error');
+
+    function load(){
+      try{ return JSON.parse(localStorage.getItem('ros_gratitude') || '[]'); }catch(e){ return []; }
+    }
+    function save(items){
+      try{ localStorage.setItem('ros_gratitude', JSON.stringify(items)); return true; }catch(e){ return false; }
+    }
+    function dayLabel(ts){
+      var d = new Date(ts), today = new Date();
+      var yest = new Date(); yest.setDate(today.getDate() - 1);
+      if(d.toDateString() === today.toDateString()) return 'Today';
+      if(d.toDateString() === yest.toDateString()) return 'Yesterday';
+      return d.toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+    }
+    function render(){
+      var items = load();
+      listEl.innerHTML = '';
+      if(items.length === 0){
+        listEl.innerHTML = '<p class="empty-note">Nothing here yet. Your gratitudes will show up here, newest first.</p>';
+        return;
+      }
+      var lastDay = null, ul = null;
+      items.slice().reverse().forEach(function(item){
+        var day = dayLabel(item.at);
+        if(day !== lastDay){
+          var h = document.createElement('div');
+          h.className = 'grat-day';
+          h.textContent = day;
+          listEl.appendChild(h);
+          ul = document.createElement('ul');
+          ul.className = 'grat-list';
+          listEl.appendChild(ul);
+          lastDay = day;
+        }
+        var li = document.createElement('li');
+        li.className = 'grat-item';
+        var p = document.createElement('p');
+        p.className = 'grat-text';
+        p.textContent = item.text;
+        var rm = document.createElement('button');
+        rm.type = 'button';
+        rm.className = 'grat-remove';
+        rm.setAttribute('aria-label', 'Delete');
+        rm.textContent = '×';
+        rm.addEventListener('click', function(){
+          if(!confirm('Delete this from your gratitude list?')) return;
+          save(load().filter(function(x){ return x.at !== item.at; }));
+          render();
+        });
+        li.appendChild(p);
+        li.appendChild(rm);
+        ul.appendChild(li);
+      });
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var text = input.value.trim();
+      if(!text) return;
+      var items = load();
+      items.push({text: text.slice(0, 200), at: Date.now()});
+      if(!save(items)){ errorEl.hidden = false; return; }
+      errorEl.hidden = true;
+      input.value = '';
+      render();
+    });
+
+    render();
+  })();
+
+  (function(){
     var AFFIRMATIONS = [
       "I am worthy of love that doesn't cost me myself.",
       "My recovery and my identity can both be true at once.",
@@ -855,10 +1000,31 @@
     document.getElementById('feed-compose').hidden = true;
     listEl.hidden = true;
   } else {
-    start().catch(function(err){
-      console.error(err);
-      listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load. Check your connection and try again.</p>';
-    });
+    var offlineEl = document.getElementById('feed-offline');
+    var composeEl = document.getElementById('feed-compose');
+    var started = false;
+    function tryStart(){
+      if(started) return;
+      if(!navigator.onLine){
+        offlineEl.hidden = false;
+        composeEl.hidden = true;
+        listEl.innerHTML = '<p class="empty-note">The feed will appear here when you\'re back online.</p>';
+        return;
+      }
+      offlineEl.hidden = true;
+      composeEl.hidden = false;
+      started = true;
+      listEl.innerHTML = '<p class="empty-note">Loading the feed…</p>';
+      start().catch(function(err){
+        console.error(err);
+        started = false;
+        listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load. Check your connection and try again.</p>';
+      });
+    }
+    window.addEventListener('online', tryStart);
+    window.addEventListener('offline', function(){ offlineEl.hidden = false; });
+    window.addEventListener('online', function(){ offlineEl.hidden = true; });
+    tryStart();
   }
 
   async function start(){
@@ -1004,6 +1170,14 @@
   }
 </script>
 <script src="../assets/visits.js" defer></script>
+<script>
+  // Lets the app open without signal (see sw.js).
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(){});
+    });
+  }
+</script>
 
 
 <script src="../assets/ui.js"></script>
