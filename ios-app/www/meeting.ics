@@ -1,0 +1,25 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Rainbow of Serenity//Companion//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:weekly-meeting@rainbow-of-serenity
+DTSTAMP:20260927T000000Z
+DTSTART:20260930T220000Z
+DURATION:PT30M
+RRULE:FREQ=WEEKLY;BYDAY=WE
+SUMMARY:Rainbow of Serenity
+LOCATION:https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBV
+ blzVXP.1
+URL:https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBVblzVX
+ P.1
+DESCRIPTION:Weekly Zoom meeting\, Wednesdays 3:00 PM Arizona time.\nMeeting
+  ID: 858 4281 7235\nPasscode: 3eni7w
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Rainbow of Serenity starts in 15 minutes
+TRIGGER:-PT15M
+END:VALARM
+END:VEVENT
+END:VCALENDAR
