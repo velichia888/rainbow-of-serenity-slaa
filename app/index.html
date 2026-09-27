@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rainbow Companion</title>
+<meta name="description" content="A private companion app for Rainbow of Serenity members — recovery counter, check-ins, and meeting info.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#fffaf3">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fffaf3; --bg-raised:#ffffff; --ink:#3a3a3a; --ink-soft:#8f8f8f;
+    --line:#f0ddc4; --accent:#ff6a4d; --accent-ink:#ffffff; --teal:#0fa38f; --card:#fef1de;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; height:100%;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Work Sans",-apple-system,sans-serif;
+    line-height:1.5;
+    padding-bottom:76px;
+  }
+  a{color:var(--teal);}
+  .app-header{
+    position:sticky; top:0; z-index:10;
+    background:var(--bg);
+    border-bottom:1px solid var(--line);
+    padding:14px 20px 12px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .app-header .mark{flex-shrink:0; color:var(--ink);}
+  .app-header h1{
+    font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.3rem; margin:0;
+  }
+  .app-header span{
+    display:block; font-family:"IBM Plex Mono",monospace; font-size:0.62rem;
+    text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); font-weight:600;
+  }
+  main{max-width:520px; margin:0 auto; padding:20px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  h2{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.4rem; margin:0 0 6px;}
+  .lede{color:var(--ink-soft); font-size:0.95rem; margin:0 0 20px;}
+  .card{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:12px;
+    padding:20px; margin-bottom:16px;
+  }
+  label{
+    display:block; font-family:"IBM Plex Mono",monospace; font-size:0.7rem;
+    text-transform:uppercase; letter-spacing:0.08em; color:var(--ink-soft); margin-bottom:6px;
+  }
+  input[type="date"], textarea{
+    width:100%; font-family:"Work Sans",sans-serif; font-size:0.95rem;
+    padding:10px 12px; border:1px solid var(--line); border-radius:8px;
+    background:var(--bg); color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:80px;}
+  .btn{
+    display:inline-block; background:var(--accent); color:var(--accent-ink);
+    border:none; border-radius:999px; padding:11px 24px;
+    font-family:"Work Sans",sans-serif; font-weight:700; font-size:0.9rem;
+    cursor:pointer; margin-top:12px;
+  }
+  .btn:hover{opacity:0.9;}
+  .btn.secondary{background:var(--card); color:var(--ink);}
+
+  .counter-display{text-align:center; padding:18px 0 8px;}
+  .counter-num{
+    font-family:"Fraunces",Georgia,serif; font-weight:600;
+    font-size:clamp(3rem,16vw,4.2rem); color:var(--accent); line-height:1;
+  }
+  .counter-label{
+    font-family:"IBM Plex Mono",monospace; font-size:0.75rem; text-transform:uppercase;
+    letter-spacing:0.1em; color:var(--ink-soft); margin-top:6px;
+  }
+  .milestone-note{
+    text-align:center; font-style:italic; font-family:"Fraunces",Georgia,serif;
+    color:var(--ink); margin-top:10px; font-size:1rem;
+  }
+
+  .mood-row{display:flex; gap:8px; margin-bottom:14px;}
+  .mood-btn{
+    flex:1; font-size:1.5rem; padding:10px 0; border-radius:10px;
+    border:2px solid var(--line); background:var(--bg-raised); cursor:pointer;
+  }
+  .mood-btn.selected{border-color:var(--accent); background:var(--card);}
+
+  .entry{
+    border-bottom:1px solid var(--line); padding:12px 0;
+  }
+  .entry:last-child{border-bottom:none;}
+  .entry-date{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:0.06em;
+  }
+  .entry-mood{font-size:1.2rem; margin-left:6px;}
+  .entry-text{margin:4px 0 0; font-size:0.92rem;}
+  .empty-note{color:var(--ink-soft); font-size:0.9rem; font-style:italic;}
+
+  .meeting-countdown{
+    text-align:center; padding:14px 0;
+    font-family:"IBM Plex Mono",monospace; font-size:1.3rem; color:var(--accent); font-weight:600;
+  }
+  .meeting-sub{text-align:center; color:var(--ink-soft); font-size:0.82rem; margin-top:-4px;}
+
+  nav.tabbar{
+    position:fixed; bottom:0; left:0; right:0; z-index:20;
+    background:var(--bg-raised); border-top:1px solid var(--line);
+    display:flex;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  nav.tabbar button{
+    flex:1; background:none; border:none; padding:10px 4px 8px;
+    font-family:"Work Sans",sans-serif; font-size:0.68rem; font-weight:600;
+    color:var(--ink-soft); cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  nav.tabbar button.active{color:var(--accent);}
+  nav.tabbar svg{width:20px; height:20px;}
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <svg class="mark" viewBox="0 0 64 56" width="28" height="28" aria-hidden="true">
+    <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
+    <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
+    <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
+    <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
+    <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+  </svg>
+  <div>
+    <span>Rainbow of Serenity</span>
+    <h1>Companion</h1>
+  </div>
+</header>
+
+<main>
+
+  <section class="panel active" id="panel-counter">
+    <h2>Recovery counter</h2>
+    <p class="lede">Private to this device — nothing here is shared with anyone.</p>
+    <div class="card">
+      <label for="clean-date">My recovery date</label>
+      <input type="date" id="clean-date">
+      <div class="counter-display" id="counter-display" hidden>
+        <div class="counter-num" id="counter-num">0</div>
+        <div class="counter-label" id="counter-label">days</div>
+        <p class="milestone-note" id="milestone-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-checkin">
+    <h2>Daily check-in</h2>
+    <p class="lede">A quick, private mood and gratitude log. Only you can see this.</p>
+    <div class="card">
+      <label>How are you today?</label>
+      <div class="mood-row" id="mood-row">
+        <button class="mood-btn" data-mood="😊">😊</button>
+        <button class="mood-btn" data-mood="🙂">🙂</button>
+        <button class="mood-btn" data-mood="😐">😐</button>
+        <button class="mood-btn" data-mood="😔">😔</button>
+        <button class="mood-btn" data-mood="😢">😢</button>
+      </div>
+      <label for="checkin-text">One thing you're grateful for, or want to remember</label>
+      <textarea id="checkin-text" placeholder="Write a few words..."></textarea>
+      <button class="btn" id="save-checkin">Save entry</button>
+    </div>
+    <h2 style="margin-top:28px; font-size:1.1rem;">Recent entries</h2>
+    <div class="card" id="entries-list"></div>
+  </section>
+
+  <section class="panel" id="panel-meeting">
+    <h2>Next meeting</h2>
+    <p class="lede">Wednesdays, 3:00 PM MST (Arizona time — no daylight saving).</p>
+    <div class="card">
+      <div class="meeting-countdown" id="meeting-countdown">—</div>
+      <p class="meeting-sub">until Rainbow of Serenity</p>
+    </div>
+    <div class="card">
+      <label>Join Zoom</label>
+      <p style="margin:4px 0 10px;"><a href="https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBVblzVXP.1" target="_blank" rel="noopener">Open Zoom link →</a></p>
+      <label>Meeting ID &amp; passcode</label>
+      <p style="margin:4px 0 0; font-family:'IBM Plex Mono',monospace;">858 4281 7235 · 3eni7w</p>
+    </div>
+    <a class="btn secondary" href="../index.html">Back to main site</a>
+  </section>
+
+  <section class="panel" id="panel-community">
+    <h2>Community</h2>
+    <p class="lede">Coming soon.</p>
+    <div class="card">
+      <p style="margin:0;">A shared community feed is on the way — one that works without anyone needing an account. In the meantime, reach the group directly:</p>
+      <p style="margin-top:12px;"><a href="mailto:rainbowofserenityslaa@gmail.com">rainbowofserenityslaa@gmail.com</a></p>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabbar">
+  <button class="tab-btn active" data-panel="panel-counter">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    Counter
+  </button>
+  <button class="tab-btn" data-panel="panel-checkin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
+    Check-In
+  </button>
+  <button class="tab-btn" data-panel="panel-meeting">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+    Meeting
+  </button>
+  <button class="tab-btn" data-panel="panel-community">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M2 20c0-3 3-5 6-5s6 2 6 5M14 20c0-2.5 2-4.5 5-4.5s5 2 5 4.5"/></svg>
+    Community
+  </button>
+</nav>
+
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.tab-btn');
+    var panels = document.querySelectorAll('.panel');
+    tabs.forEach(function(tab){
+      tab.addEventListener('click', function(){
+        tabs.forEach(function(t){ t.classList.remove('active'); });
+        panels.forEach(function(p){ p.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.panel).classList.add('active');
+      });
+    });
+  })();
+
+  (function(){
+    var dateInput = document.getElementById('clean-date');
+    var display = document.getElementById('counter-display');
+    var numEl = document.getElementById('counter-num');
+    var labelEl = document.getElementById('counter-label');
+    var noteEl = document.getElementById('milestone-note');
+    var milestones = [1,30,60,90,180,365,730,1095];
+
+    function render(dateStr){
+      if(!dateStr){ display.hidden = true; return; }
+      var start = new Date(dateStr + 'T00:00:00');
+      var today = new Date();
+      today.setHours(0,0,0,0);
+      var days = Math.floor((today - start) / 86400000);
+      if(days < 0) days = 0;
+      display.hidden = false;
+      numEl.textContent = days;
+      labelEl.textContent = days === 1 ? 'day' : 'days';
+      var next = milestones.find(function(m){ return m > days; });
+      if(milestones.indexOf(days) !== -1){
+        noteEl.textContent = 'Milestone day — proud of you.';
+      } else if(next){
+        noteEl.textContent = (next - days) + ' days to your next milestone.';
+      } else {
+        noteEl.textContent = 'Every day counts.';
+      }
+    }
+
+    try{
+      var saved = localStorage.getItem('ros_clean_date');
+      if(saved){ dateInput.value = saved; render(saved); }
+    }catch(e){}
+
+    dateInput.addEventListener('change', function(){
+      try{ localStorage.setItem('ros_clean_date', dateInput.value); }catch(e){}
+      render(dateInput.value);
+    });
+  })();
+
+  (function(){
+    var moodRow = document.getElementById('mood-row');
+    var textEl = document.getElementById('checkin-text');
+    var saveBtn = document.getElementById('save-checkin');
+    var listEl = document.getElementById('entries-list');
+    var selectedMood = null;
+
+    moodRow.addEventListener('click', function(e){
+      var btn = e.target.closest('.mood-btn');
+      if(!btn) return;
+      moodRow.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selectedMood = btn.dataset.mood;
+    });
+
+    function loadEntries(){
+      try{
+        return JSON.parse(localStorage.getItem('ros_checkins') || '[]');
+      }catch(e){ return []; }
+    }
+    function saveEntries(entries){
+      try{ localStorage.setItem('ros_checkins', JSON.stringify(entries)); }catch(e){}
+    }
+    function renderEntries(){
+      var entries = loadEntries();
+      if(entries.length === 0){
+        listEl.innerHTML = '<p class="empty-note">No entries yet — your first check-in will show up here.</p>';
+        return;
+      }
+      listEl.innerHTML = entries.slice().reverse().map(function(entry){
+        return '<div class="entry"><span class="entry-date">' + entry.date + '</span>' +
+          (entry.mood ? '<span class="entry-mood">' + entry.mood + '</span>' : '') +
+          (entry.text ? '<p class="entry-text">' + entry.text.replace(/</g,'&lt;') + '</p>' : '') +
+          '</div>';
+      }).join('');
+    }
+
+    saveBtn.addEventListener('click', function(){
+      var text = textEl.value.trim();
+      if(!selectedMood && !text) return;
+      var entries = loadEntries();
+      entries.push({
+        date: new Date().toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'}),
+        mood: selectedMood,
+        text: text
+      });
+      saveEntries(entries);
+      textEl.value = '';
+      selectedMood = null;
+      moodRow.querySelectorAll('.mood-btn').forEach(function(b){ b.classList.remove('selected'); });
+      renderEntries();
+    });
+
+    renderEntries();
+  })();
+
+  (function(){
+    var el = document.getElementById('meeting-countdown');
+    if(!el) return;
+    function nextMeeting(){
+      var now = new Date();
+      var target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 22, 0, 0));
+      var day = target.getUTCDay();
+      var diffDays = (3 - day + 7) % 7;
+      target.setUTCDate(target.getUTCDate() + diffDays);
+      if(target <= now){ target.setUTCDate(target.getUTCDate() + 7); }
+      return target;
+    }
+    function update(){
+      var now = new Date();
+      var target = nextMeeting();
+      var diff = target - now;
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      el.textContent = d + 'd ' + h + 'h ' + m + 'm';
+    }
+    update();
+    setInterval(update, 30000);
+  })();
+</script>
+</body>
+</html>
