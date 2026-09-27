@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting Agenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Work+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#fffaf3; --bg-raised:#ffffff; --ink:#3a3a3a; --ink-soft:#8f8f8f;
+    --line:#f0ddc4; --accent:#ff6a4d; --teal:#0fa38f; --card:#fef1de;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:"Work Sans",-apple-system,sans-serif;
+    line-height:1.6; padding:32px 20px 60px;
+  }
+  .doc{max-width:640px; margin:0 auto;}
+  .eyebrow{
+    font-family:"IBM Plex Mono",monospace; text-transform:uppercase;
+    letter-spacing:0.12em; font-size:0.7rem; color:var(--accent); font-weight:600;
+  }
+  h1{
+    font-family:"Fraunces",Georgia,serif; font-weight:600;
+    font-size:clamp(1.8rem,6vw,2.4rem); margin:8px 0 6px;
+  }
+  .lede{color:var(--ink-soft); margin:0 0 24px;}
+  a.back{color:var(--ink-soft); text-decoration:none; font-size:0.85rem;}
+  h2{
+    font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.05rem;
+    margin:28px 0 10px; display:flex; align-items:baseline; gap:10px;
+  }
+  h2 .block-time{
+    font-family:"IBM Plex Mono",monospace; font-size:0.72rem; font-weight:600;
+    color:var(--teal); letter-spacing:0.04em;
+  }
+  table{width:100%; border-collapse:collapse; margin-top:4px;}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{
+    font-family:"IBM Plex Mono",monospace; font-size:0.7rem; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--ink-soft); font-weight:600;
+  }
+  td.time{
+    font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  .note{
+    background:var(--card); border-radius:8px; padding:16px 18px;
+    margin-top:28px; font-size:0.88rem; color:var(--ink-soft);
+  }
+  @media (max-width:480px){
+    table, tbody, tr, td, th{display:block; width:100%;}
+    thead{display:none;}
+    tr{border-bottom:1px solid var(--line); padding-block:6px;}
+    td{border-bottom:none; padding:2px 0;}
+  }
+  @media print{ .no-print{display:none;} body{padding:0;} }
+</style>
+</head>
+<body>
+<div class="doc">
+  <p class="no-print"><a class="back" href="../index.html">&larr; Back to Rainbow of Serenity</a></p>
+  <span class="eyebrow">Rainbow of Serenity · SLAA</span>
+  <h1>Meeting Agenda</h1>
+  <p class="lede">Timed for a 30-minute Zoom meeting, in three blocks. Pairs with the opening and closing scripts.</p>
+
+  <h2><span class="block-time">0:00–0:10</span> Readings &amp; Introductions</h2>
+  <table>
+    <tbody>
+      <tr><td class="time">0:00–0:02</td><td>Welcome, moment of silence, Serenity Prayer</td></tr>
+      <tr><td class="time">0:02–0:03</td><td>Closed / LGBTQIA+ affirming statement, anonymity reminder</td></tr>
+      <tr><td class="time">0:03–0:06</td><td>Reading — the week's format text, a Step, a Tradition, or Big Book passage</td></tr>
+      <tr><td class="time">0:06–0:10</td><td>Member introductions — first name and "sex and/or love addict," quick round</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="block-time">0:10–0:25</span> Sharing, open to all</h2>
+  <table>
+    <tbody>
+      <tr><td class="time">0:10–0:25</td><td>Open floor. On speaker weeks, the speaker goes first, then the floor opens. Aim for about 2 minutes a share so more people get a turn.</td></tr>
+    </tbody>
+  </table>
+
+  <h2><span class="block-time">0:25–0:30</span> Closing</h2>
+  <table>
+    <tbody>
+      <tr><td class="time">0:25–0:27</td><td>Seventh Tradition &amp; any announcements</td></tr>
+      <tr><td class="time">0:27–0:28</td><td>Closing reminder — what's shared here stays here</td></tr>
+      <tr><td class="time">0:28–0:29</td><td>Closing Serenity Prayer, together</td></tr>
+      <tr><td class="time">0:29–0:30</td><td>Send-off — "Keep coming back"</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    Built around the free Zoom plan's 30-minute limit for group calls. If the intro round runs long with a big group, trim it to name-only ("Hi, I'm [name]") rather than cutting into sharing time.
+  </div>
+</div>
+</body>
+</html>

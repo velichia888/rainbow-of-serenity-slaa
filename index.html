@@ -261,6 +261,19 @@
     color:var(--ink-soft);
   }
   footer p{max-width:60ch;}
+
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand h1{margin:0;}
+  .mark{flex-shrink:0; color:var(--ink);}
+
+  .icon-divider{
+    display:flex; align-items:center; gap:14px;
+    margin:36px 0 -2px;
+  }
+  .icon-divider::before, .icon-divider::after{
+    content:""; flex:1; height:1px; background:var(--line);
+  }
+  .icon-divider .mark{color:var(--accent);}
 </style>
 </head>
 <body>
@@ -279,7 +292,16 @@
 
   <section id="top" style="padding-top:28px;">
     <span class="eyebrow">Sex and Love Addicts Anonymous</span>
-    <h1>Rainbow of Serenity</h1>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 64 56" width="34" height="34" aria-hidden="true">
+        <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
+        <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
+        <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
+        <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
+        <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+      </svg>
+      <h1>Rainbow of Serenity</h1>
+    </div>
     <p class="lede">A closed meeting for sex and/or love addicts, and a dedicated, affirming space for LGBTQIA+ members in recovery. We meet weekly online — everyone works the same program, together.</p>
   </section>
 
@@ -299,8 +321,8 @@
       </div>
       <div class="basics-card">
         <span class="eyebrow">Zoom link</span>
-        <strong><span class="placeholder">[zoom.us/j/xxxxx]</span></strong>
-        <span>ID <span class="placeholder">[xxx xxx xxxx]</span> · Passcode <span class="placeholder">[xxxx]</span></span>
+        <strong><a href="https://us05web.zoom.us/j/85842817235?pwd=ghovWKygdqMA0HRia235bvBVblzVXP.1" target="_blank" rel="noopener">Join Zoom</a></strong>
+        <span>ID 858 4281 7235 · Passcode 3eni7w</span>
       </div>
       <div class="basics-card">
         <span class="eyebrow">Dial-in</span>
@@ -319,6 +341,16 @@
       <p>Allies in the fellowship are genuinely welcome too, as long as everyone shows up ready to keep that the room's center of gravity. What's shared here stays here — anonymity protects everyone, inside the meeting and outside it.</p>
     </div>
   </section>
+
+  <div class="icon-divider">
+    <svg class="mark" viewBox="0 0 64 56" width="20" height="20" aria-hidden="true">
+      <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
+      <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
+      <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
+      <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+    </svg>
+  </div>
 
   <section id="expect">
     <span class="eyebrow">What to Expect</span>
@@ -361,6 +393,16 @@
     <p style="margin-top:14px; font-size:0.88rem; color:var(--ink-soft);">Months with a fifth week: <span class="placeholder">[chair's call — usually repeats speaker or open format]</span>.</p>
   </section>
 
+  <div class="icon-divider">
+    <svg class="mark" viewBox="0 0 64 56" width="20" height="20" aria-hidden="true">
+      <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
+      <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
+      <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
+      <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+    </svg>
+  </div>
+
   <section id="resources">
     <span class="eyebrow">Resources</span>
     <h2>Literature &amp; support</h2>
@@ -386,6 +428,35 @@
         <p>Peer support run by and for trans people.</p>
         <span class="crisis-line">877-565-8860</span>
         <p style="margin-top:4px;"><a href="https://translifeline.org" target="_blank" rel="noopener">translifeline.org →</a></p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:36px;">Meeting documents</h2>
+    <div class="resource-grid">
+      <div class="resource-card">
+        <h3>Meeting Agenda</h3>
+        <p>The full 30-minute run sheet, minute by minute.</p>
+        <p><a href="docs/meeting-agenda.html" target="_blank" rel="noopener">Open / download →</a></p>
+      </div>
+      <div class="resource-card">
+        <h3>Opening Script</h3>
+        <p>What the chairperson reads to start the meeting.</p>
+        <p><a href="docs/opening-script.html" target="_blank" rel="noopener">Open / download →</a></p>
+      </div>
+      <div class="resource-card">
+        <h3>Closing Script</h3>
+        <p>Seventh Tradition, reminders, and send-off.</p>
+        <p><a href="docs/closing-script.html" target="_blank" rel="noopener">Open / download →</a></p>
+      </div>
+      <div class="resource-card">
+        <h3>The Twelve Steps</h3>
+        <p>The Twelve Steps of SLAA, for reading or reference.</p>
+        <p><a href="docs/twelve-steps.html" target="_blank" rel="noopener">Open / download →</a></p>
+      </div>
+      <div class="resource-card">
+        <h3>The Twelve Traditions</h3>
+        <p>The Twelve Traditions of SLAA, for reading or reference.</p>
+        <p><a href="docs/twelve-traditions.html" target="_blank" rel="noopener">Open / download →</a></p>
       </div>
     </div>
   </section>
