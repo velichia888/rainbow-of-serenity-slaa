@@ -193,6 +193,35 @@
     background:none; border:none; padding:0; font:inherit; color:var(--ink-soft);
     text-decoration:underline; cursor:pointer;
   }
+  .gallery-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:6px;}
+  .gallery-grid .empty-note{grid-column:1/-1; margin:0;}
+  .gallery-thumb{
+    padding:0; border:none; background:var(--card); border-radius:8px;
+    overflow:hidden; aspect-ratio:1; cursor:pointer;
+  }
+  .gallery-thumb img, .gallery-pending img, .gallery-preview img{display:block; width:100%; height:100%; object-fit:cover;}
+  .gallery-preview img{height:auto; max-height:320px; object-fit:contain; border-radius:8px; background:var(--card);}
+  .gallery-pending{border-bottom:1px solid var(--line); padding:12px 0;}
+  .gallery-pending:last-child{border-bottom:none;}
+  .gallery-pending img{height:auto; max-height:260px; object-fit:contain; border-radius:8px; background:var(--card);}
+  #gallery-pick[hidden]{display:none;}
+  .gallery-actions{display:flex; gap:8px; margin-top:8px;}
+  .gallery-actions .btn{margin:0;}
+  .gallery-check{
+    display:flex; gap:10px; align-items:flex-start; margin-top:14px;
+    font-family:"Work Sans",sans-serif; font-size:0.9rem; text-transform:none; letter-spacing:0; color:var(--ink);
+  }
+  .gallery-check input{margin-top:3px; width:18px; height:18px; flex:none;}
+  .gallery-reminder{font-size:0.85rem; color:var(--ink-soft); margin:0 0 12px;}
+  .gallery-view{
+    position:fixed; inset:0; z-index:60; background:rgba(0,0,0,0.85);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .gallery-view[hidden]{display:none;}
+  .gallery-view img{max-width:100%; max-height:70vh; border-radius:8px;}
+  .gallery-view p{color:#fff; text-align:center; margin:12px 0 0; max-width:30em; overflow-wrap:anywhere;}
+  .gallery-view-actions{display:flex; gap:8px; margin-top:16px;}
 
   nav.tabbar{
     position:fixed; bottom:0; left:0; right:0; z-index:20;
@@ -467,9 +496,43 @@
     <div class="card" id="feed-list" aria-live="polite">
       <p class="empty-note">Loading the feed…</p>
     </div>
+    <h2 style="margin-top:28px;">Gallery</h2>
+    <p class="lede">Photos from the group: nature, sobriety milestones, things we're grateful for. A moderator looks at each photo before it appears.</p>
+    <div class="card" id="gallery-compose">
+      <p class="gallery-reminder">To protect everyone's anonymity, please don't share faces, names, license plates, addresses or anything that could identify you or someone else. Location and camera details are removed from your photo automatically.</p>
+      <input type="file" id="gallery-file" accept="image/*" hidden>
+      <button class="btn secondary" type="button" id="gallery-pick">Choose a photo</button>
+      <div class="gallery-preview" id="gallery-preview" hidden>
+        <img id="gallery-preview-img" alt="Your photo, ready to send">
+        <label for="gallery-caption" style="margin-top:14px;">Caption (optional)</label>
+        <input type="text" id="gallery-caption" maxlength="120" placeholder="A few words about it" autocomplete="off">
+        <label class="gallery-check"><input type="checkbox" id="gallery-ok"> <span>This photo has no faces, names or anything that could identify anyone.</span></label>
+        <div class="gallery-actions">
+          <button class="btn" type="button" id="gallery-send">Send for approval</button>
+          <button class="btn secondary" type="button" id="gallery-cancel">Cancel</button>
+        </div>
+      </div>
+      <p class="feed-status" id="gallery-status" role="status"></p>
+    </div>
+    <div class="card" id="gallery-queue" hidden>
+      <label>Waiting for approval (moderators only)</label>
+      <div id="gallery-queue-list"></div>
+    </div>
+    <div class="card">
+      <div class="gallery-grid" id="gallery-grid" aria-live="polite"><p class="empty-note">Photos will appear here when you're online.</p></div>
+    </div>
     <p class="feed-mod" id="feed-mod" hidden><span id="feed-mod-label"></span> <button type="button" id="feed-mod-btn">Moderator sign-in</button></p>
     <p class="feed-mod" id="feed-visits" hidden></p>
   </section>
+
+  <div class="gallery-view" id="gallery-view" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+    <img id="gallery-view-img" alt="">
+    <p id="gallery-view-caption"></p>
+    <div class="gallery-view-actions">
+      <button class="btn secondary" type="button" id="gallery-view-close">Close</button>
+      <button class="btn secondary" type="button" id="gallery-view-remove" hidden>Remove</button>
+    </div>
+  </div>
 
 </main>
 
@@ -999,21 +1062,25 @@
   if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
     document.getElementById('feed-setup').hidden = false;
     document.getElementById('feed-compose').hidden = true;
+    document.getElementById('gallery-compose').hidden = true;
     listEl.hidden = true;
   } else {
     var offlineEl = document.getElementById('feed-offline');
     var composeEl = document.getElementById('feed-compose');
+    var galleryComposeEl = document.getElementById('gallery-compose');
     var started = false;
     function tryStart(){
       if(started) return;
       if(!navigator.onLine){
         offlineEl.hidden = false;
         composeEl.hidden = true;
+        galleryComposeEl.hidden = true;
         listEl.innerHTML = '<p class="empty-note">The feed will appear here when you\'re back online.</p>';
         return;
       }
       offlineEl.hidden = true;
       composeEl.hidden = false;
+      galleryComposeEl.hidden = false;
       started = true;
       listEl.innerHTML = '<p class="empty-note">Loading the feed…</p>';
       start().catch(function(err){
@@ -1042,6 +1109,10 @@
 
     function redraw(){ renderPosts(latest, isMod ? removePost : null); }
 
+    // Photo gallery (see gallery.js); it shares this sign-in and database.
+    var galleryMod = await import('./gallery.js');
+    var gallery = galleryMod.startGallery({fs: fs, db: db, auth: auth});
+
     async function removePost(p){
       if(!confirm('Remove this post for everyone?')) return;
       try{
@@ -1063,6 +1134,7 @@
       modLabelEl.textContent = user.isAnonymous ? '' : 'Signed in as ' + user.email + (isMod ? '' : ' (not a moderator)') + '.';
       modBtn.textContent = user.isAnonymous ? 'Moderator sign-in' : 'Sign out';
       redraw();
+      gallery.setModerator(isMod);
       showVisits();
     });
 
