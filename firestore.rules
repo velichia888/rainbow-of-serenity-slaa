@@ -7,7 +7,7 @@ service cloud.firestore {
     function isModerator() {
       return request.auth != null
         && request.auth.token.email_verified == true
-        && request.auth.token.email in ['rainbowofserenityslaa@gmail.com'];
+        && request.auth.token.email in ['goodmanona@gmail.com', 'rainbowofserenityslaa@gmail.com'];
     }
 
     function ratePath() {
