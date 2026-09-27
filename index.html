@@ -336,7 +336,7 @@
   .wheel{
     width:100%; height:100%;
     position:relative;
-    background:conic-gradient(#e5384c 0deg 60deg, #f2994a 60deg 120deg, #dfb400 120deg 180deg, #27ae60 180deg 240deg, #2f80ed 240deg 300deg, #9b51e0 300deg 360deg);
+    background:conic-gradient(#e5484d 0deg 30deg, #f2994a 30deg 60deg, #dfb400 60deg 90deg, #a8c93c 90deg 120deg, #27ae60 120deg 150deg, #1fae7d 150deg 180deg, #0fa38f 180deg 210deg, #3b82c4 210deg 240deg, #2f80ed 240deg 270deg, #6c5ce7 270deg 300deg, #9b51e0 300deg 330deg, #e0559b 330deg 360deg);
     transform:rotate(0deg);
     transition:transform 4s cubic-bezier(.15,.65,.15,1);
   }
@@ -353,10 +353,10 @@
   }
   .wheel-label span{
     display:block;
-    max-width:76px;
+    max-width:58px;
     font-family:"Work Sans",sans-serif;
     font-weight:700;
-    font-size:0.66rem;
+    font-size:0.58rem;
     line-height:1.15;
     color:#fff;
     text-align:center;
@@ -529,12 +529,18 @@
       <div class="wheel-pointer"></div>
       <div class="wheel-wrap">
         <div class="wheel" id="topic-wheel">
-          <div class="wheel-label" style="--angle:30deg"><span>Chosen Family</span></div>
-          <div class="wheel-label" style="--angle:90deg"><span>Self-Care Rituals</span></div>
-          <div class="wheel-label" style="--angle:150deg"><span>Coming Out Moments</span></div>
-          <div class="wheel-label" style="--angle:210deg"><span>Boundaries in Love</span></div>
-          <div class="wheel-label" style="--angle:270deg"><span>Serenity This Week</span></div>
-          <div class="wheel-label" style="--angle:330deg"><span>Queer Joy</span></div>
+          <div class="wheel-label" style="--angle:15deg"><span>Chosen Family</span></div>
+          <div class="wheel-label" style="--angle:45deg"><span>Self-Care Rituals</span></div>
+          <div class="wheel-label" style="--angle:75deg"><span>Coming Out Moments</span></div>
+          <div class="wheel-label" style="--angle:105deg"><span>Letting Go</span></div>
+          <div class="wheel-label" style="--angle:135deg"><span>Boundaries in Love</span></div>
+          <div class="wheel-label" style="--angle:165deg"><span>One Day at a Time</span></div>
+          <div class="wheel-label" style="--angle:195deg"><span>Serenity This Week</span></div>
+          <div class="wheel-label" style="--angle:225deg"><span>Working the Steps</span></div>
+          <div class="wheel-label" style="--angle:255deg"><span>Higher Power &amp; Me</span></div>
+          <div class="wheel-label" style="--angle:285deg"><span>Anonymity &amp; Trust</span></div>
+          <div class="wheel-label" style="--angle:315deg"><span>Queer Joy</span></div>
+          <div class="wheel-label" style="--angle:345deg"><span>Progress, Not Perfection</span></div>
         </div>
       </div>
     </div>
@@ -660,7 +666,7 @@
   })();
 
   (function(){
-    var topics = ["Chosen Family","Self-Care Rituals","Coming Out Moments","Boundaries in Love","Serenity This Week","Queer Joy"];
+    var topics = ["Chosen Family","Self-Care Rituals","Coming Out Moments","Letting Go","Boundaries in Love","One Day at a Time","Serenity This Week","Working the Steps","Higher Power & Me","Anonymity & Trust","Queer Joy","Progress, Not Perfection"];
     var wheel = document.getElementById('topic-wheel');
     var btn = document.getElementById('spin-btn');
     var result = document.getElementById('wheel-result');
