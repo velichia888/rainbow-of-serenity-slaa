@@ -12,6 +12,34 @@
   btn.addEventListener('click', exit);
   document.body.appendChild(btn);
 
+  // Theme button: cycles Auto (follow the phone) -> Light -> Dark.
+  if(window.rosTheme){
+    var ICON = {
+      auto:'<circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 1.5a6.5 6.5 0 0 1 0 13z" fill="currentColor"/>',
+      light:'<circle cx="8" cy="8" r="3.2" fill="currentColor"/><path d="M8 .8v2M8 13.2v2M.8 8h2M13.2 8h2M2.9 2.9l1.4 1.4M11.7 11.7l1.4 1.4M2.9 13.1l1.4-1.4M11.7 4.3l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>',
+      dark:'<path d="M13.5 10.2A6 6 0 0 1 5.8 2.5a6 6 0 1 0 7.7 7.7z" fill="currentColor"/>'
+    };
+    var NAMES = {auto:'Auto', light:'Light', dark:'Dark'};
+    var NEXT = {auto:'light', light:'dark', dark:'auto'};
+    var tb = document.createElement('button');
+    tb.type = 'button';
+    tb.className = 'theme-btn';
+    var sync = function(){
+      var t = window.rosTheme.get();
+      if(!NAMES[t]) t = 'auto';
+      tb.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true">' + ICON[t] + '</svg><span>' + NAMES[t] + '</span>';
+      tb.setAttribute('aria-label', 'Color theme: ' + t + '. Tap to change.');
+    };
+    tb.addEventListener('click', function(){ window.rosTheme.set(NEXT[window.rosTheme.get()] || 'auto'); sync(); });
+    sync();
+    var nav = document.querySelector('nav.top-nav');
+    var appHead = document.querySelector('.app-header .header-inner');
+    var back = document.querySelector('a.back');
+    if(nav) nav.appendChild(tb);
+    else if(appHead) appHead.insertBefore(tb, document.getElementById('text-size-btn'));
+    else if(back){ back.parentNode.classList.add('back-row'); back.parentNode.appendChild(tb); }
+  }
+
   // Next meeting: Wednesdays 3:00 PM Arizona time (UTC-7 all year) = 22:00 UTC, 30 minutes.
   var strips = document.querySelectorAll('[data-next-meeting]');
   if(!strips.length) return;
