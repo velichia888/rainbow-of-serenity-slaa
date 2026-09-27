@@ -30,9 +30,14 @@
   .app-header{
     position:sticky; top:0; z-index:10;
     background:var(--bg);
-    border-bottom:1px solid var(--line);
+  }
+  .header-inner{
     padding:14px 20px 12px;
     display:flex; align-items:center; gap:10px;
+  }
+  .rainbow-strip{
+    height:5px;
+    background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
   }
   .app-header .mark{flex-shrink:0; color:var(--ink);}
   .app-header h1{
@@ -48,8 +53,13 @@
   h2{font-family:"Fraunces",Georgia,serif; font-weight:600; font-size:1.4rem; margin:0 0 6px;}
   .lede{color:var(--ink-soft); font-size:0.95rem; margin:0 0 20px;}
   .card{
+    position:relative; overflow:hidden;
     background:var(--bg-raised); border:1px solid var(--line); border-radius:12px;
     padding:20px; margin-bottom:16px;
+  }
+  .card::before{
+    content:""; position:absolute; top:0; left:0; right:0; height:4px;
+    background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
   }
   label{
     display:block; font-family:"IBM Plex Mono",monospace; font-size:0.7rem;
@@ -70,10 +80,16 @@
   .btn:hover{opacity:0.9;}
   .btn.secondary{background:var(--card); color:var(--ink);}
 
-  .counter-display{text-align:center; padding:18px 0 8px;}
+  .counter-display{
+    display:flex; align-items:center; justify-content:center; gap:22px;
+    padding:18px 0 8px; flex-wrap:wrap;
+  }
+  .counter-main{text-align:center;}
   .counter-num{
     font-family:"Fraunces",Georgia,serif; font-weight:600;
-    font-size:clamp(3rem,16vw,4.2rem); color:var(--accent); line-height:1;
+    font-size:clamp(3rem,16vw,4.2rem); line-height:1;
+    background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
   }
   .counter-label{
     font-family:"IBM Plex Mono",monospace; font-size:0.75rem; text-transform:uppercase;
@@ -83,6 +99,41 @@
     text-align:center; font-style:italic; font-family:"Fraunces",Georgia,serif;
     color:var(--ink); margin-top:10px; font-size:1rem;
   }
+
+  .chip-circle{
+    width:56px; height:56px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:1.6rem; flex-shrink:0;
+    background-image:linear-gradient(var(--bg-raised),var(--bg-raised)),
+      linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+    background-origin:border-box; background-clip:padding-box, border-box;
+    border:3px solid transparent;
+  }
+  .current-chip{display:flex; flex-direction:column; align-items:center; gap:5px;}
+  .chip-text{
+    font-family:"IBM Plex Mono",monospace; font-size:0.62rem; text-transform:uppercase;
+    letter-spacing:0.05em; color:var(--ink-soft); text-align:center; max-width:70px;
+  }
+  .chip-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(66px,1fr));
+    gap:16px 8px;
+  }
+  .chip-item{display:flex; flex-direction:column; align-items:center; gap:5px;}
+  .chip-item .chip-circle{width:48px; height:48px; font-size:1.25rem;}
+  .chip-item.locked .chip-circle{
+    background-image:none; background:var(--card);
+    border:3px solid var(--line); filter:grayscale(1); opacity:0.5;
+  }
+  .chip-item .chip-text{font-size:0.58rem; max-width:64px;}
+
+  .affirm-card{text-align:center; padding:36px 22px;}
+  .affirm-text{
+    font-family:"Fraunces",Georgia,serif; font-style:italic;
+    font-size:1.3rem; margin:0; color:var(--ink);
+  }
+  .med-title{font-family:"Fraunces",Georgia,serif; font-weight:600; margin:0 0 8px; font-size:1.15rem;}
+  .med-body{margin:0 0 14px;}
+  .med-closing{font-style:italic; color:var(--teal); font-weight:700; margin:0;}
 
   .mood-row{display:flex; gap:8px; margin-bottom:14px;}
   .mood-btn{
@@ -122,23 +173,30 @@
     display:flex; flex-direction:column; align-items:center; gap:3px;
   }
   nav.tabbar button.active{color:var(--accent);}
-  nav.tabbar svg{width:20px; height:20px;}
+  nav.tabbar button.active::after{
+    content:""; display:block; width:18px; height:3px; border-radius:2px;
+    background:linear-gradient(90deg,#e5384c,#f2994a,#dfb400,#27ae60,#2f80ed,#9b51e0);
+  }
+  nav.tabbar svg{width:19px; height:19px;}
 </style>
 </head>
 <body>
 
 <header class="app-header">
-  <svg class="mark" viewBox="0 0 64 56" width="28" height="28" aria-hidden="true">
-    <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
-    <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
-    <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
-    <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
-    <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
-  </svg>
-  <div>
-    <span>Rainbow of Serenity</span>
-    <h1>Companion</h1>
+  <div class="header-inner">
+    <svg class="mark" viewBox="0 0 64 56" width="28" height="28" aria-hidden="true">
+      <path d="M6 40 A26 26 0 0 1 58 40" fill="none" stroke="#e5384c" stroke-width="2.4"/>
+      <path d="M10 40 A22 22 0 0 1 54 40" fill="none" stroke="#f2994a" stroke-width="2.4"/>
+      <path d="M14 40 A18 18 0 0 1 50 40" fill="none" stroke="#2f80ed" stroke-width="2.4"/>
+      <circle cx="32" cy="40" r="13" fill="none" stroke="currentColor" stroke-width="2.4"/>
+      <polygon points="32,32 39,47 25,47" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+    </svg>
+    <div>
+      <span>Rainbow of Serenity</span>
+      <h1>Companion</h1>
+    </div>
   </div>
+  <div class="rainbow-strip"></div>
 </header>
 
 <main>
@@ -150,10 +208,20 @@
       <label for="clean-date">My recovery date</label>
       <input type="date" id="clean-date">
       <div class="counter-display" id="counter-display" hidden>
-        <div class="counter-num" id="counter-num">0</div>
-        <div class="counter-label" id="counter-label">days</div>
-        <p class="milestone-note" id="milestone-note"></p>
+        <div class="counter-main">
+          <div class="counter-num" id="counter-num">0</div>
+          <div class="counter-label" id="counter-label">days</div>
+        </div>
+        <div class="current-chip" id="current-chip" hidden>
+          <div class="chip-circle" id="chip-emoji">🌱</div>
+          <div class="chip-text" id="chip-label">24 Hours</div>
+        </div>
       </div>
+      <p class="milestone-note" id="milestone-note"></p>
+    </div>
+    <h2 style="margin-top:28px; font-size:1.1rem;">Your chip case</h2>
+    <div class="card">
+      <div class="chip-grid" id="chip-grid"></div>
     </div>
   </section>
 
@@ -175,6 +243,26 @@
     </div>
     <h2 style="margin-top:28px; font-size:1.1rem;">Recent entries</h2>
     <div class="card" id="entries-list"></div>
+  </section>
+
+  <section class="panel" id="panel-affirm">
+    <h2>Daily affirmation</h2>
+    <p class="lede">A new one each day, based on today's date — shuffle if you want to look through others.</p>
+    <div class="card affirm-card">
+      <p class="affirm-text" id="affirm-text">—</p>
+    </div>
+    <button class="btn secondary" id="shuffle-affirm">Shuffle</button>
+  </section>
+
+  <section class="panel" id="panel-meditate">
+    <h2>Just for today</h2>
+    <p class="lede">A short daily reading, written for this app. For the official day-by-day book, look for <em>A State of Grace: Daily Meditations</em>, SLAA's conference-approved meditation book — these reflections are separate from it.</p>
+    <div class="card">
+      <h3 class="med-title" id="med-title">—</h3>
+      <p class="med-body" id="med-body"></p>
+      <p class="med-closing" id="med-closing"></p>
+    </div>
+    <button class="btn secondary" id="shuffle-med">Read another</button>
   </section>
 
   <section class="panel" id="panel-meeting">
@@ -213,6 +301,14 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
     Check-In
   </button>
+  <button class="tab-btn" data-panel="panel-affirm">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3z"/></svg>
+    Affirm
+  </button>
+  <button class="tab-btn" data-panel="panel-meditate">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+    Today
+  </button>
   <button class="tab-btn" data-panel="panel-meeting">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
     Meeting
@@ -243,10 +339,36 @@
     var numEl = document.getElementById('counter-num');
     var labelEl = document.getElementById('counter-label');
     var noteEl = document.getElementById('milestone-note');
-    var milestones = [1,30,60,90,180,365,730,1095];
+    var currentChipEl = document.getElementById('current-chip');
+    var chipEmojiEl = document.getElementById('chip-emoji');
+    var chipLabelEl = document.getElementById('chip-label');
+    var chipGridEl = document.getElementById('chip-grid');
+
+    var milestones = [
+      {days:1, label:'24 Hours', emoji:'🌱'},
+      {days:7, label:'1 Week', emoji:'🌤️'},
+      {days:30, label:'30 Days', emoji:'🌈'},
+      {days:60, label:'60 Days', emoji:'🌟'},
+      {days:90, label:'90 Days', emoji:'🏵️'},
+      {days:180, label:'6 Months', emoji:'🎗️'},
+      {days:270, label:'9 Months', emoji:'💫'},
+      {days:365, label:'1 Year', emoji:'🏆'},
+      {days:730, label:'2 Years', emoji:'👑'},
+      {days:1095, label:'3 Years', emoji:'💎'}
+    ];
+
+    function renderChipGrid(days){
+      chipGridEl.innerHTML = milestones.map(function(m){
+        var earned = days >= m.days;
+        return '<div class="chip-item' + (earned ? '' : ' locked') + '">' +
+          '<div class="chip-circle">' + (earned ? m.emoji : '🔒') + '</div>' +
+          '<div class="chip-text">' + m.label + '</div>' +
+        '</div>';
+      }).join('');
+    }
 
     function render(dateStr){
-      if(!dateStr){ display.hidden = true; return; }
+      if(!dateStr){ display.hidden = true; noteEl.textContent = ''; chipGridEl.innerHTML = ''; return; }
       var start = new Date(dateStr + 'T00:00:00');
       var today = new Date();
       today.setHours(0,0,0,0);
@@ -255,14 +377,26 @@
       display.hidden = false;
       numEl.textContent = days;
       labelEl.textContent = days === 1 ? 'day' : 'days';
-      var next = milestones.find(function(m){ return m > days; });
-      if(milestones.indexOf(days) !== -1){
-        noteEl.textContent = 'Milestone day — proud of you.';
-      } else if(next){
-        noteEl.textContent = (next - days) + ' days to your next milestone.';
+
+      var earned = milestones.filter(function(m){ return days >= m.days; });
+      var current = earned.length ? earned[earned.length - 1] : null;
+      var next = milestones.find(function(m){ return m.days > days; });
+
+      if(current){
+        currentChipEl.hidden = false;
+        chipEmojiEl.textContent = current.emoji;
+        chipLabelEl.textContent = current.label;
+      } else {
+        currentChipEl.hidden = true;
+      }
+
+      if(next){
+        noteEl.textContent = (next.days - days) + ' days to your ' + next.label + ' chip.';
       } else {
         noteEl.textContent = 'Every day counts.';
       }
+
+      renderChipGrid(days);
     }
 
     try{
@@ -355,6 +489,99 @@
     }
     update();
     setInterval(update, 30000);
+  })();
+
+  (function(){
+    var AFFIRMATIONS = [
+      "I am worthy of love that doesn't cost me myself.",
+      "My recovery and my identity can both be true at once.",
+      "I get to define what healthy love looks like for me.",
+      "Today, I choose serenity over urgency.",
+      "I am allowed to take up space, exactly as I am.",
+      "One day at a time, I am becoming who I was always meant to be.",
+      "My chosen family sees me and loves me anyway.",
+      "I don't have to earn my belonging here.",
+      "Coming out and coming home can be the same journey.",
+      "I trust the process, even on the hard days.",
+      "My boundaries are an act of self-love, not selfishness.",
+      "I am proud of how far I've come, even the messy parts.",
+      "Serenity is a practice, not a destination.",
+      "I release what I cannot control and hold onto what I can.",
+      "My story matters, exactly as it is.",
+      "I am learning to love myself the way I deserve to be loved.",
+      "Progress, not perfection, guides me today.",
+      "I am not alone in this room, or in this life.",
+      "Every color of who I am belongs in recovery.",
+      "Today I choose myself, gently."
+    ];
+
+    var MEDITATIONS = [
+      {title:"Room to Breathe", body:"Recovery doesn't ask us to have it all figured out today. It only asks for today — one honest hour, one honest choice. When the noise gets loud, we can pause, breathe, and remember that this moment is the only one we're actually in.", closing:"Just for today: I will give myself room to breathe before I react."},
+      {title:"Chosen Family", body:"Some of us built our families twice — once by blood, once by choice. Both can hold grief and both can hold love. Today we can lean on the people who chose us, and let that be enough.", closing:"Just for today: I will reach out to someone who feels like home."},
+      {title:"The Whole Rainbow", body:"We don't have to shrink any part of ourselves to be welcome in this room. Our identity and our recovery are not in competition — they are both simply us, learning to live honestly.", closing:"Just for today: I will let all of myself show up, not just the easy parts."},
+      {title:"Slow Is Still Moving", body:"Healing rarely looks like a straight line. Some days are leaps, some are barely a step, and some are just staying still without going backward. All of it counts.", closing:"Just for today: I will measure progress in honesty, not speed."},
+      {title:"Letting the Room Hold Me", body:"We don't have to carry everything alone anymore. This room was built so that no one has to. Sharing our truth here, even in fragments, lightens what we carry outside it.", closing:"Just for today: I will let someone else carry a little of my weight."},
+      {title:"Boundaries as Love", body:"A boundary isn't a wall we build to keep people out — it's a fence we build to protect what's growing inside it. Saying no to what harms us is saying yes to our own recovery.", closing:"Just for today: I will honor one boundary, even if it's uncomfortable."},
+      {title:"Serenity in the Small Things", body:"We don't need a perfect day to feel a moment of peace. It can be a cup of coffee, a song, a text from a friend. Serenity often arrives in pieces, not all at once.", closing:"Just for today: I will notice one small moment of peace and let it count."},
+      {title:"Coming Home to Ourselves", body:"For many of us, recovery and coming out are both journeys back to the truth of who we are. Neither has to happen all at once, and neither has to happen alone.", closing:"Just for today: I will treat myself with the same welcome I'd offer a newcomer."},
+      {title:"The Work Is Enough", body:"We don't have to have a breakthrough every day for the work to matter. Showing up, staying honest, and trying again tomorrow is the work. It is enough.", closing:"Just for today: I will trust that showing up counts, even on ordinary days."},
+      {title:"Held By Higher Power", body:"Whatever we understand a Higher Power to be, we don't have to carry today's weight entirely on our own shoulders. We can set some of it down and trust it will still be handled.", closing:"Just for today: I will hand over one worry I've been gripping too tightly."},
+      {title:"Practicing Patience With Myself", body:"We are often kinder to strangers than we are to ourselves. Today, we can try extending some of that same patience inward, especially when we slip or struggle.", closing:"Just for today: I will speak to myself the way I'd speak to someone I love."},
+      {title:"Queer Joy as Resistance", body:"Joy is not frivolous — for many of us, it has been an act of survival and defiance. Letting ourselves feel light, silly, or happy is part of the healing too.", closing:"Just for today: I will let myself feel one moment of real joy, without guilt."},
+      {title:"Honesty Over Comfort", body:"It is often easier to say what people want to hear than what is true. Recovery asks us to choose honesty even when it is less comfortable, because comfort built on a lie doesn't hold.", closing:"Just for today: I will choose one honest sentence over one comfortable one."},
+      {title:"The Long View", body:"We didn't get here overnight, and we won't heal overnight either. Recovery is a long relationship with ourselves, not a single event. There is no rush.", closing:"Just for today: I will let today be just one day, not the whole story."},
+      {title:"Anonymity as Safety", body:"What we share here doesn't have to travel beyond this room. That safety is what makes real honesty possible. We can trust the container so we can trust ourselves inside it.", closing:"Just for today: I will honor the trust of this room, in and outside of it."},
+      {title:"Gentleness on Hard Days", body:"Some days recovery feels heavy, and that's allowed. We don't have to perform wellness. We can be honest about the hard days and still keep showing up.", closing:"Just for today: I will let a hard day just be hard, without adding shame to it."},
+      {title:"Love Without Losing Myself", body:"Healthy love adds to who we are; it doesn't require us to disappear. Today we can practice noticing the difference between connection and self-erasure.", closing:"Just for today: I will check in with myself before I lose myself in someone else."},
+      {title:"Community Over Isolation", body:"Addiction thrives in isolation; recovery thrives in connection. Even one message, one call, one meeting can interrupt the pull toward hiding.", closing:"Just for today: I will reach toward connection instead of retreating into silence."},
+      {title:"The Steps as a Map, Not a Test", body:"We don't have to get the steps perfect. They're a map for the journey, not a test we can fail. Working them imperfectly still moves us forward.", closing:"Just for today: I will take one small step, imperfectly, and call that enough."},
+      {title:"Serenity Is Available Now", body:"We often think serenity is waiting for us somewhere in the future, once things are fixed. But it's available in small doses right now, in this breath, in this room.", closing:"Just for today: I will look for the serenity already available to me right now."}
+    ];
+
+    function dayOfYear(){
+      var now = new Date();
+      var start = new Date(now.getFullYear(), 0, 0);
+      return Math.floor((now - start) / 86400000);
+    }
+
+    var affirmEl = document.getElementById('affirm-text');
+    var shuffleAffirmBtn = document.getElementById('shuffle-affirm');
+    var affirmIndex = dayOfYear() % AFFIRMATIONS.length;
+
+    function renderAffirmation(idx){
+      affirmEl.textContent = AFFIRMATIONS[idx];
+    }
+    if(affirmEl){
+      renderAffirmation(affirmIndex);
+      shuffleAffirmBtn.addEventListener('click', function(){
+        var next;
+        do { next = Math.floor(Math.random() * AFFIRMATIONS.length); } while(next === affirmIndex && AFFIRMATIONS.length > 1);
+        affirmIndex = next;
+        renderAffirmation(affirmIndex);
+      });
+    }
+
+    var medTitleEl = document.getElementById('med-title');
+    var medBodyEl = document.getElementById('med-body');
+    var medClosingEl = document.getElementById('med-closing');
+    var shuffleMedBtn = document.getElementById('shuffle-med');
+    var medIndex = dayOfYear() % MEDITATIONS.length;
+
+    function renderMeditation(idx){
+      var m = MEDITATIONS[idx];
+      medTitleEl.textContent = m.title;
+      medBodyEl.textContent = m.body;
+      medClosingEl.textContent = m.closing;
+    }
+    if(medTitleEl){
+      renderMeditation(medIndex);
+      shuffleMedBtn.addEventListener('click', function(){
+        var next;
+        do { next = Math.floor(Math.random() * MEDITATIONS.length); } while(next === medIndex && MEDITATIONS.length > 1);
+        medIndex = next;
+        renderMeditation(medIndex);
+      });
+    }
   })();
 </script>
 </body>
