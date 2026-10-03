@@ -56,7 +56,7 @@ workflows:
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" || echo 0)
           NEW_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
           cd ios/App && agvtool new-version -all $NEW_BUILD_NUMBER
-    - name: Diagnose signing identities
+      - name: Diagnose signing identities
       script: |
         security find-identity -v -p codesigning
       - name: Build .ipa
