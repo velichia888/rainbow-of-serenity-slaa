@@ -18,7 +18,7 @@ workflows:
       node: latest
       ios_signing:
         provisioning_profiles:
-          - Rainbow of Serenity App Store
+          - Rainbow App Store Current
         certificates:
           - rainbow
     triggering:
