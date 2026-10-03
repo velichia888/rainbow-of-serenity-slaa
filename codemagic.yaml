@@ -56,12 +56,20 @@ workflows:
           LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$BUNDLE_ID" || echo 0)
           NEW_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
           cd ios/App && agvtool new-version -all $NEW_BUILD_NUMBER
+
       - name: Build .ipa
         script: |
-          security find-identity -v -p codesigning
-          xcode-project build-ipa \
-          --workspace "$XCODE_WORKSPACE" \
-          --scheme "$XCODE_SCHEME"
+        security find-identity -v -p codesigning
+        xcodebuild \
+          -workspace "$XCODE_WORKSPACE" \
+          -scheme "$XCODE_SCHEME" \
+          -configuration Release \
+          -archivePath "$CM_BUILD_DIR/build/ios/xcarchive/App.xcarchive" \
+          archive \
+          COMPILER_INDEX_STORE_ENABLE=NO \
+          DEVELOPMENT_TEAM=4357L599UW \
+          CODE_SIGN_IDENTITY="Apple Distribution" \
+          CODE_SIGN_STYLE=Manual
 
     artifacts:
       - build/ios/ipa/*.ipa
