@@ -49,7 +49,6 @@ workflows:
 
       - name: Set up code signing
         script: |
-          keychain add-certificates
           xcode-project use-profiles
 
       - name: Bump build number
