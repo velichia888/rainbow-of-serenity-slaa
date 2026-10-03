@@ -17,8 +17,10 @@ workflows:
       cocoapods: default
       node: latest
       ios_signing:
-        distribution_type: app_store
-        bundle_identifier: "com.rainbowofserenity.companion"
+        provisioning_profiles:
+          - Rainbow of Serenity App Store
+        certificates:
+          - rainbow
     triggering:
       events:
         - push
