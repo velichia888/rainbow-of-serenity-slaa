@@ -59,6 +59,8 @@ workflows:
 
       - name: Build .ipa
         script: |
+          echo "========== ALL APPLE DISTRIBUTION CERTIFICATES =========="
+          security find-certificate -a -c "Apple Distribution: ONA VELIKA GOODMAN (4357L599UW)" -Z
           security find-identity -v -p codesigning
           xcodebuild \
           -workspace "$XCODE_WORKSPACE" \
