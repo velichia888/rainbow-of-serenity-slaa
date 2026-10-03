@@ -32,7 +32,10 @@ workflows:
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
-
+      - name: Prepare web assets
+        script: |
+          mkdir -p www
+          cp -R app assets *.html *.js *.png *.svg www/ 2>/dev/null || true
       - name: Sync web assets into the native project
         script: |
           npx cap sync ios
