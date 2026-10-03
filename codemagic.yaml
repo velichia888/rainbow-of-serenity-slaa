@@ -61,19 +61,9 @@ workflows:
 
       - name: Build .ipa
         script: |
-          echo "========== ALL APPLE DISTRIBUTION CERTIFICATES =========="
-          security find-certificate -a -c "Apple Distribution: ONA VELIKA GOODMAN (4357L599UW)" -Z
-          security find-identity -v -p codesigning
-          xcodebuild \
-          -workspace "$XCODE_WORKSPACE" \
-          -scheme "$XCODE_SCHEME" \
-          -configuration Release \
-          -archivePath "$CM_BUILD_DIR/build/ios/xcarchive/App.xcarchive" \
-          archive \
-          COMPILER_INDEX_STORE_ENABLE=NO \
-          DEVELOPMENT_TEAM=4357L599UW \
-          CODE_SIGN_IDENTITY="Apple Distribution" \
-          CODE_SIGN_STYLE=Manual
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
 
     artifacts:
       - build/ios/ipa/*.ipa
