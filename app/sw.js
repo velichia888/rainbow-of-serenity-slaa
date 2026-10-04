@@ -9,6 +9,7 @@ var CORE = [
   '../assets/logo-icon.svg',
   '../assets/favicon-32.png',
   '../assets/apple-touch-icon.png',
+  './gallery.js',
   '../assets/visits.js',
   '../assets/ui.css',
   '../assets/ui.js',

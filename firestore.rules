@@ -58,6 +58,44 @@ service cloud.firestore {
         && request.resource.data.n == resource.data.n + 1;
     }
 
+    // A gallery photo: a small JPEG stored as text, plus an optional caption
+    // with no links.
+    function isPhoto(d) {
+      return d.image is string
+        && d.image.size() <= 400000
+        && d.image.matches('data:image/jpeg;base64,[A-Za-z0-9+/=]+')
+        && d.caption is string
+        && d.caption.size() <= 120
+        && !d.caption.lower().matches('(?s).*(https?://|www[.]).*');
+    }
+
+    // Gallery photos members send in. Only moderators can see them, and they
+    // share the feed's one-post-per-device-every-30-seconds limit.
+    match /gallerySubmissions/{photoId} {
+      allow read, delete: if isModerator();
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['image', 'caption', 'uid', 'createdAt'])
+        && request.resource.data.uid == request.auth.uid
+        && isPhoto(request.resource.data)
+        && request.resource.data.createdAt == request.time
+        && getAfter(ratePath()).data.last == request.time
+        && (!exists(ratePath())
+            || request.time > get(ratePath()).data.last + duration.value(30, 's'));
+      allow update: if false;
+    }
+
+    // Approved gallery photos: anyone can see them. Only moderators can add
+    // (by approving a submission) or remove them.
+    match /gallery/{photoId} {
+      allow read: if true;
+      allow create: if isModerator()
+        && request.resource.data.keys().hasOnly(['image', 'caption', 'createdAt'])
+        && isPhoto(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow delete: if isModerator();
+      allow update: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
