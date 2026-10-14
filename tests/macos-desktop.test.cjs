@@ -33,7 +33,7 @@ test('direct swiftc compilation supports SwiftUI @main for both architectures', 
 });
 
 test('lipo verifies both architectures using input-first command syntax', () => {
-  assert.match(build, /lipo "\\$CONTENTS\\/MacOS\\/RainbowOfSerenity" -verify_arch arm64 x86_64/);
+  assert.ok(build.includes('lipo "$CONTENTS/MacOS/RainbowOfSerenity" -verify_arch arm64 x86_64'));
   assert.doesNotMatch(build, /lipo -verify_arch arm64 x86_64/);
 });
 
