@@ -85,7 +85,7 @@ private final class RecoveryWindow: NSObject, ObservableObject, WKNavigationDele
             'body.has-tabbar .ros-home-actions { grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); }',
             'body.has-tabbar .quick-exit { bottom: 16px !important; }',
             'body.has-tabbar textarea { min-height: 76px; }'
-          ].join('\\n');
+          ].join(' ');
           (document.head || document.documentElement).appendChild(node);
         })();
         """#
@@ -128,9 +128,9 @@ private final class RecoveryWindow: NSObject, ObservableObject, WKNavigationDele
             return
         }
 
-        let js = "document.querySelector('.tab-btn[data-panel=\\"" + page.panelID + "\\"]')?.click();"
+        let js = "document.querySelector('.tab-btn[data-panel=" + page.panelID + "]')?.click();"
         webView.evaluateJavaScript(js) { [weak self] _, error in
-            if let error { self?.problem = "Unable to open that recovery section: \\(error.localizedDescription)" }
+            if let error { self?.problem = "Unable to open that recovery section: \(error.localizedDescription)" }
         }
     }
 
@@ -146,11 +146,11 @@ private final class RecoveryWindow: NSObject, ObservableObject, WKNavigationDele
     }
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        problem = "A recovery page could not load: \\(error.localizedDescription)"
+        problem = "A recovery page could not load: \(error.localizedDescription)"
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        problem = "A recovery page could not open: \\(error.localizedDescription)"
+        problem = "A recovery page could not open: \(error.localizedDescription)"
     }
 
     private func openOutside(_ url: URL) {
