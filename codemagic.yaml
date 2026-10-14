@@ -290,6 +290,7 @@ workflows:
     instance_type: mac_mini_m2
     environment:
       xcode: latest
+      node: latest
     scripts:
       - name: Verify Mac development branch
         script: |
@@ -297,6 +298,10 @@ workflows:
             echo "Select the dedicated Rainbow macOS development branch." >&2
             exit 1
           fi
+
+      - name: Run source regression tests
+        script: |
+          node --test tests/macos-desktop.test.cjs tests/recovery-home.test.cjs tests/ios-icon.test.cjs
 
       - name: Build universal macOS application
         script: |
