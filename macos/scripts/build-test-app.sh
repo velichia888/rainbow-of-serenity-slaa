@@ -63,7 +63,7 @@ chmod +x "$CONTENTS/MacOS/RainbowOfSerenity"
 codesign --force --sign - --timestamp=none "$APP"
 codesign --verify --verbose "$APP"
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$CONTENTS/Info.plist")" = "com.rainbowofserenity.companion"
-lipo -verify_arch arm64 x86_64 "$CONTENTS/MacOS/RainbowOfSerenity"
+lipo "$CONTENTS/MacOS/RainbowOfSerenity" -verify_arch arm64 x86_64
 ditto -c -k --keepParent --sequesterRsrc "$APP" "$OUT/RainbowOfSerenity-macOS-test.zip"
 test -s "$OUT/RainbowOfSerenity-macOS-test.zip"
 echo "Mac test app: $APP"

@@ -32,6 +32,11 @@ test('direct swiftc compilation supports SwiftUI @main for both architectures', 
   assert.doesNotMatch(build, /xcrun swiftc -target /);
 });
 
+test('lipo verifies both architectures using input-first command syntax', () => {
+  assert.match(build, /lipo "\\$CONTENTS\\/MacOS\\/RainbowOfSerenity" -verify_arch arm64 x86_64/);
+  assert.doesNotMatch(build, /lipo -verify_arch arm64 x86_64/);
+});
+
 test('Mac test bundle contains correct companion and universal architecture', () => {
   assert.match(build, /arm64-apple-macos13\.0/);
   assert.match(build, /x86_64-apple-macos13\.0/);
