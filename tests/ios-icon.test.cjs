@@ -11,7 +11,7 @@ test('every iPhone workflow replaces generated Capacitor default icon', () => {
   for (const name of names) {
     const start=yaml.indexOf('  '+name+':');
     assert.ok(start>=0,'missing '+name);
-    const segment=yaml.slice(start, yaml.indexOf('\n  ',start+3)>-1 ? yaml.indexOf('\n  ',start+3):undefined);
+    const segment=yaml.slice(start).split(/\n  (?=[a-z][a-z0-9-]*:)/)[0];
     assert.match(segment, /bash scripts\/prepare-ios-icon.sh/);
     const iconIndex=segment.indexOf('Install Rainbow native iPhone icon');
     const buildIndex=segment.indexOf('xcode-project build-ipa')>-1 ? segment.indexOf('xcode-project build-ipa') : segment.indexOf('xcodebuild build');
