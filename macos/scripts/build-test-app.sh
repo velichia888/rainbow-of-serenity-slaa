@@ -56,8 +56,8 @@ done
 iconutil -c icns "$ICONSET" -o "$RES/Rainbow.icns"
 
 SWIFT="$ROOT/macos/Sources/RainbowMacApp.swift"
-xcrun swiftc -target arm64-apple-macos13.0 -sdk "$SDK" -O -framework SwiftUI -framework WebKit -framework AppKit "$SWIFT" -o "$OUT/ros-arm64"
-xcrun swiftc -target x86_64-apple-macos13.0 -sdk "$SDK" -O -framework SwiftUI -framework WebKit -framework AppKit "$SWIFT" -o "$OUT/ros-x86_64"
+xcrun swiftc -parse-as-library -target arm64-apple-macos13.0 -sdk "$SDK" -O -framework SwiftUI -framework WebKit -framework AppKit "$SWIFT" -o "$OUT/ros-arm64"
+xcrun swiftc -parse-as-library -target x86_64-apple-macos13.0 -sdk "$SDK" -O -framework SwiftUI -framework WebKit -framework AppKit "$SWIFT" -o "$OUT/ros-x86_64"
 lipo -create "$OUT/ros-arm64" "$OUT/ros-x86_64" -output "$CONTENTS/MacOS/RainbowOfSerenity"
 chmod +x "$CONTENTS/MacOS/RainbowOfSerenity"
 codesign --force --sign - --timestamp=none "$APP"

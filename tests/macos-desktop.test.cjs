@@ -24,6 +24,14 @@ test('macOS native shell includes desktop navigation and data persistence', () =
   assert.match(source, /func quickExit\(\)/);
 });
 
+test('direct swiftc compilation supports SwiftUI @main for both architectures', () => {
+  assert.match(source, /@main\s+private struct RainbowOfSerenityMac: App/);
+  for (const arch of ['arm64', 'x86_64']) {
+    assert.match(build, new RegExp('xcrun swiftc -parse-as-library -target ' + arch + '-apple-macos13\\.0'));
+  }
+  assert.doesNotMatch(build, /xcrun swiftc -target /);
+});
+
 test('Mac test bundle contains correct companion and universal architecture', () => {
   assert.match(build, /arm64-apple-macos13\.0/);
   assert.match(build, /x86_64-apple-macos13\.0/);
