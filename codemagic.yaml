@@ -93,6 +93,112 @@ workflows:
         submit_to_testflight: true
         submit_to_app_store: false   # flip to true once you're ready to send it for App Store review
 
+  # Manual signed candidate: uploads a distribution IPA to App Store Connect
+  # without automatically sending it to TestFlight beta review or App Review.
+  ios-asc-candidate:
+    name: Rainbow of Serenity 1.1 - signed App Store Connect candidate
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: rainbow_companion_asc
+    environment:
+      groups:
+        - app_store_credentials
+      vars:
+        BUNDLE_ID: "com.rainbowofserenity.companion"
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      xcode: latest
+      node: latest
+      cocoapods: default
+      ios_signing:
+        provisioning_profiles:
+          - Rainbow App Store Current
+        certificates:
+          - rainbow
+    scripts:
+      - name: Verify candidate branch and App Store Connect configuration
+        script: |
+          if [ "${CM_BRANCH:-}" != "feat/ros-1.1-recovery-home" ]; then
+            echo "Select feat/ros-1.1-recovery-home, not main." >&2
+            exit 1
+          fi
+          if [ -z "${APP_STORE_APPLE_ID:-}" ]; then
+            echo "Missing APP_STORE_APPLE_ID. Set the Rainbow app's numeric Apple ID in Codemagic environment group app_store_credentials." >&2
+            exit 1
+          fi
+
+      - name: Install dependencies
+        script: |
+          npm install
+
+      - name: Generate iOS project
+        script: |
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
+
+      - name: Select companion app assets
+        script: |
+          test -f ios-app/www/index.html
+          test -d ios-app/www/assets
+          test -d ios-app/www/docs
+          test -f ios-app/www/meeting.ics
+          mkdir -p www
+          cp -R ios-app/www/. www/
+          grep -q 'id="panel-counter"' www/index.html
+          grep -q 'ros_recovery_plan_v1' www/index.html
+          if grep -q 'class="top-nav"' www/index.html; then
+            echo "Refusing to package public website homepage." >&2
+            exit 1
+          fi
+
+      - name: Sync native project
+        script: |
+          npx cap sync ios
+          cd ios/App
+          pod install
+
+      - name: Apply distribution signing
+        script: |
+          xcode-project use-profiles
+
+      - name: Increment App Store 1.0 build number
+        script: |
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" --app-store-version=1.0) || {
+            echo "Could not read App Store Connect build number. No fallback build number will be guessed." >&2
+            exit 1
+          }
+          case "$LATEST_BUILD_NUMBER" in
+            ''|*[!0-9]*)
+              echo "Unexpected App Store Connect build number: $LATEST_BUILD_NUMBER" >&2
+              exit 1
+              ;;
+          esac
+          if [ "$LATEST_BUILD_NUMBER" -lt 1 ]; then
+            LATEST_BUILD_NUMBER=1
+          fi
+          NEW_BUILD_NUMBER=$((LATEST_BUILD_NUMBER + 1))
+          echo "Building App Store 1.0 candidate build $NEW_BUILD_NUMBER"
+          cd ios/App
+          agvtool new-version -all "$NEW_BUILD_NUMBER"
+
+      - name: Build signed distribution IPA
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: false
+        submit_to_app_store: false
+
   # Manual-only unsigned physical-iPhone test. No signing integration,
   # credentials, automatic publishing, or TestFlight submission.
   ios-device-unsigned:
