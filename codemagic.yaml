@@ -282,3 +282,31 @@ workflows:
     artifacts:
       - $CM_BUILD_DIR/RainbowOfSerenity-1.1-unsigned.ipa
       - /tmp/xcodebuild_logs/*.log
+
+  # Manual-only ad-hoc signed macOS build; no App Store Connect or publishing.
+  macos-desktop-test:
+    name: Rainbow of Serenity - macOS desktop test
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+    scripts:
+      - name: Verify Mac development branch
+        script: |
+          if [ "$CM_BRANCH" != "feat/ros-macos-v1-desktop-20261014" ]; then
+            echo "Select the dedicated Rainbow macOS development branch." >&2
+            exit 1
+          fi
+
+      - name: Build universal macOS application
+        script: |
+          bash macos/scripts/build-test-app.sh
+
+      - name: Inspect Mac test artifact
+        script: |
+          test -s build/macos/RainbowOfSerenity-macOS-test.zip
+          codesign --verify --verbose "build/macos/Rainbow of Serenity.app"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "build/macos/Rainbow of Serenity.app/Contents/Info.plist"
+
+    artifacts:
+      - build/macos/RainbowOfSerenity-macOS-test.zip
