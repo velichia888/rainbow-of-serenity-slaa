@@ -44,6 +44,10 @@ workflows:
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
+
       - name: Prepare native companion assets
         script: |
           # Explicitly build the recovery companion, not the public website.
@@ -137,6 +141,10 @@ workflows:
           if [ ! -d ios ]; then
             npx cap add ios
           fi
+
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
 
       - name: Select companion app assets
         script: |
@@ -236,6 +244,10 @@ workflows:
           npx cap sync ios
           cd ios/App
           pod install
+
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
 
       - name: Build unsigned iPhone app
         script: |
