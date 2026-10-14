@@ -44,6 +44,10 @@ workflows:
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
+
       - name: Prepare native companion assets
         script: |
           # Explicitly build the recovery companion, not the public website.
@@ -124,9 +128,15 @@ workflows:
             exit 1
           fi
           if [ -z "${APP_STORE_APPLE_ID:-}" ]; then
-            echo "Missing APP_STORE_APPLE_ID. Set the Rainbow app's numeric Apple ID in Codemagic environment group app_store_credentials." >&2
+            echo "Missing APP_STORE_APPLE_ID (numeric Apple ID). In App Store Connect open Rainbow > General > App Information > Apple ID; then set APP_STORE_APPLE_ID in Codemagic environment group app_store_credentials." >&2
             exit 1
           fi
+          case "$APP_STORE_APPLE_ID" in
+            *[!0-9]*)
+              echo "APP_STORE_APPLE_ID must be the numeric App Store Connect Apple ID, not a bundle ID or email address." >&2
+              exit 1
+              ;;
+          esac
 
       - name: Install dependencies
         script: |
@@ -137,6 +147,10 @@ workflows:
           if [ ! -d ios ]; then
             npx cap add ios
           fi
+
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
 
       - name: Select companion app assets
         script: |
@@ -165,7 +179,7 @@ workflows:
 
       - name: Increment App Store 1.0 build number
         script: |
-          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-app-store-build-number "$APP_STORE_APPLE_ID" --app-store-version=1.0) || {
+          LATEST_BUILD_NUMBER=$(app-store-connect get-latest-build-number "$APP_STORE_APPLE_ID" --version-string=1.0 --platform=IOS) || {
             echo "Could not read App Store Connect build number. No fallback build number will be guessed." >&2
             exit 1
           }
@@ -236,6 +250,10 @@ workflows:
           npx cap sync ios
           cd ios/App
           pod install
+
+      - name: Install Rainbow native iPhone icon
+        script: |
+          bash scripts/prepare-ios-icon.sh
 
       - name: Build unsigned iPhone app
         script: |
