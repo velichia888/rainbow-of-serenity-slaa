@@ -39,3 +39,22 @@ test('native iOS companion is the launch page, not the public meeting website', 
   assert.match(pipeline, /grep -q 'id="panel-counter"' www\/index\.html/);
   assert.match(pipeline, /Refusing to package the public meeting website/);
 });
+
+test('unsigned device workflow has no publishing, signing integration, or auto-trigger', () => {
+  const unsigned = pipeline.split('  ios-device-unsigned:')[1];
+  assert.ok(unsigned, 'missing unsigned device workflow');
+  assert.match(unsigned, /CODE_SIGNING_ALLOWED=NO/);
+  assert.match(unsigned, /RainbowOfSerenity-1\.1-unsigned\.ipa/);
+  assert.match(unsigned, /cp -R ios-app\/www\/\. www\//);
+  for (const dangerous of [/publishing:/, /integrations:/, /ios_signing:/, /submit_to_testflight:/, /triggering:/]) {
+    assert.doesNotMatch(unsigned, dangerous);
+  }
+});
+test('release workflow refuses a development branch before any signing', () => {
+  const signed = pipeline.split('  ios-device-unsigned:')[0];
+  const guard = signed.indexOf('Guard published release branch');
+  const npm = signed.indexOf('- name: Install npm dependencies');
+  assert.ok(guard > 0 && npm > guard);
+  assert.match(signed, /CM_BRANCH:-/);
+  assert.match(signed, /main/);
+});

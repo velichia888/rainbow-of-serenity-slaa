@@ -25,3 +25,9 @@ Branch: `feat/ros-1.1-recovery-home`. Base: `e1b02d7e6c8a5ba3d684aa53e90d484988c
 7. Collect documented feedback from real external TestFlight testers before preparing the next review response.
 
 Do not merge this branch to `main` or trigger a publishing workflow until qualification and user acceptance.
+
+## Development iPhone qualification (added)
+Codemagic now contains `ios-device-unsigned` / **Rainbow of Serenity 1.1 - unsigned iPhone test**.
+Select branch `feat/ros-1.1-recovery-home` manually. This workflow has NO App Store Connect integration, signing credentials, webhook triggers, or publishing; it exports `RainbowOfSerenity-1.1-unsigned.ipa` to the build artifacts for local signing/install using iLoader/SideStore. The existing `ios-release` workflow is restricted to `main` at its first step because it automatically publishes to TestFlight. Do NOT use it for 1.1 acceptance.
+
+The unsigned workflow is configured, but no Codemagic build or iPhone acceptance has been run.

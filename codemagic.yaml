@@ -28,6 +28,13 @@ workflows:
         - pattern: main
           include: true
     scripts:
+      - name: Guard published release branch
+        script: |
+          if [ "${CM_BRANCH:-}" != "main" ]; then
+            echo "Signed TestFlight release is restricted to the main branch." >&2
+            exit 1
+          fi
+
       - name: Install npm dependencies
         script: |
           npm install
@@ -85,3 +92,68 @@ workflows:
         auth: integration
         submit_to_testflight: true
         submit_to_app_store: false   # flip to true once you're ready to send it for App Store review
+
+  # Manual-only unsigned physical-iPhone test. No signing integration,
+  # credentials, automatic publishing, or TestFlight submission.
+  ios-device-unsigned:
+    name: Rainbow of Serenity 1.1 - unsigned iPhone test
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      node: latest
+      cocoapods: default
+    scripts:
+      - name: Install npm dependencies
+        script: |
+          npm install
+
+      - name: Prepare native companion
+        script: |
+          test -f ios-app/www/index.html
+          test -d ios-app/www/assets
+          test -d ios-app/www/docs
+          test -f ios-app/www/meeting.ics
+          mkdir -p www
+          cp -R ios-app/www/. www/
+          grep -q 'id="panel-counter"' www/index.html
+          if grep -q 'class="top-nav"' www/index.html; then
+            echo "Refusing to package the public meeting website" >&2
+            exit 1
+          fi
+
+      - name: Generate and sync iOS platform
+        script: |
+          if [ ! -d ios ]; then
+            npx cap add ios
+          fi
+          npx cap sync ios
+          cd ios/App
+          pod install
+
+      - name: Build unsigned iPhone app
+        script: |
+          xcodebuild build \
+            -workspace ios/App/App.xcworkspace \
+            -scheme App \
+            -sdk iphoneos \
+            -configuration Debug \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$CM_BUILD_DIR/derived-data" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+      - name: Package unsigned IPA
+        script: |
+          APP_PATH="$CM_BUILD_DIR/derived-data/Build/Products/Debug-iphoneos/App.app"
+          test -d "$APP_PATH"
+          mkdir -p "$CM_BUILD_DIR/unsigned-ipa/Payload"
+          cp -R "$APP_PATH" "$CM_BUILD_DIR/unsigned-ipa/Payload/"
+          cd "$CM_BUILD_DIR/unsigned-ipa"
+          zip -qr "$CM_BUILD_DIR/RainbowOfSerenity-1.1-unsigned.ipa" Payload
+
+    artifacts:
+      - $CM_BUILD_DIR/RainbowOfSerenity-1.1-unsigned.ipa
+      - /tmp/xcodebuild_logs/*.log
