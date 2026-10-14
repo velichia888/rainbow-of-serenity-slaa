@@ -37,10 +37,21 @@ workflows:
           if [ ! -d "ios" ]; then
             npx cap add ios
           fi
-      - name: Prepare web assets
+      - name: Prepare native companion assets
         script: |
+          # Explicitly build the recovery companion, not the public website.
+          test -f ios-app/www/index.html
+          test -d ios-app/www/assets
+          test -d ios-app/www/docs
+          test -f ios-app/www/meeting.ics
           mkdir -p www
-          cp -R app assets *.html *.js *.png *.svg www/ 2>/dev/null || true
+          cp -R ios-app/www/. www/
+          test -f www/index.html
+          grep -q 'id="panel-counter"' www/index.html
+          if grep -q 'class="top-nav"' www/index.html; then
+            echo "Refusing to package the public meeting website" >&2
+            exit 1
+          fi
       - name: Sync web assets into the native project
         script: |
           npx cap sync ios

@@ -323,6 +323,24 @@
     background:var(--card); border-radius:8px; padding:10px 12px;
     font-size:0.85rem; margin:0 0 16px;
   }
+
+  /* Rainbow 1.1: connected daily home and locally saved recovery plan. */
+  .ros-home-intro{margin:0 0 20px;}
+  .ros-home-intro h2{margin:0 0 8px;}
+  .ros-home-eyebrow{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);font-weight:700;margin:0 0 8px;}
+  .ros-home-today p{margin:8px 0 16px;}
+  .ros-home-actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-top:12px;}
+  .ros-home-actions .btn{display:flex;align-items:center;justify-content:center;text-align:center;min-height:42px;white-space:normal;}
+  .ros-home-plan{margin-top:22px;}
+  .ros-home-plan .lede{font-size:.88rem;}
+  .ros-plan-summary{font-size:.92rem;font-weight:600;color:var(--teal);margin:12px 0;}
+  .ros-home-plan details summary{cursor:pointer;font-weight:700;padding:12px 0;}
+  .ros-home-plan form{padding-top:8px;}
+  .ros-home-plan label{display:block;font-weight:600;margin:14px 0 6px;}
+  .ros-home-plan textarea{display:block;width:100%;box-sizing:border-box;resize:vertical;padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--bg-raised);color:var(--ink);font:inherit;line-height:1.45;}
+  .ros-home-plan textarea:focus-visible,.ros-home-plan summary:focus-visible,.ros-home-actions button:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
+  .ros-plan-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
+  .ros-plan-feedback{min-height:1.4em;font-size:.88rem;margin:10px 0 0;}
 </style>
 <link rel="stylesheet" href="./assets/ui.css">
 </head>
@@ -343,6 +361,27 @@
 <main>
 
   <section class="panel active" id="panel-counter">
+
+  <div class="ros-home-intro">
+    <p class="ros-home-eyebrow">One day at a time</p>
+    <h2>Your recovery, your pace</h2>
+    <p class="lede">A gentle place to check in, find support, and keep your recovery tools together.</p>
+  </div>
+
+  <div class="card ros-home-today">
+    <h3>Today’s check-in</h3>
+    <p id="ros-today-status" aria-live="polite">Your check-ins appear here when saved.</p>
+    <button type="button" class="btn secondary" data-ros-go="panel-checkin">Open my check-in</button>
+  </div>
+
+  <div class="card ros-home-actions-card">
+    <h3>Choose a next step</h3>
+    <div class="ros-home-actions">
+      <button type="button" class="btn secondary" data-ros-go="panel-meditate">Read a reflection</button>
+      <button type="button" class="btn secondary" data-ros-go="panel-meeting">See next meeting</button>
+      <button type="button" class="btn secondary" data-ros-go="panel-affirm">Find encouragement</button>
+    </div>
+  </div>
     <div data-next-meeting></div>
     <h2>Recovery counter</h2>
     <p class="lede">Private to this device — nothing here is shared with anyone.</p>
@@ -365,6 +404,28 @@
     <h2 style="margin-top:28px; font-size:1.1rem;">Your chip case</h2>
     <div class="card">
       <div class="chip-grid" id="chip-grid"></div>
+    </div>
+
+    <div class="card ros-home-plan">
+      <h3>My Recovery Plan</h3>
+      <p class="lede">Write down what helps you stay grounded. Your plan is saved locally on this device, not posted to the community feed.</p>
+      <p id="ros-plan-summary" class="ros-plan-summary" aria-live="polite">No plan saved yet.</p>
+      <details id="ros-plan-details">
+        <summary>View or update my plan</summary>
+        <form id="ros-plan-form">
+          <label for="ros-plan-signs">Signs I want to notice</label>
+          <textarea id="ros-plan-signs" maxlength="600" rows="3" placeholder="What do I notice when I need extra support?"></textarea>
+          <label for="ros-plan-actions">What helps me reconnect</label>
+          <textarea id="ros-plan-actions" maxlength="600" rows="3" placeholder="A grounding activity, helpful boundary, or next small step"></textarea>
+          <label for="ros-plan-support">People or resources I can reach out to</label>
+          <textarea id="ros-plan-support" maxlength="600" rows="3" placeholder="Names or resources I trust"></textarea>
+          <div class="ros-plan-buttons">
+            <button class="btn" type="submit">Save my plan</button>
+            <button class="btn secondary" id="ros-plan-delete" type="button">Delete plan</button>
+          </div>
+          <p id="ros-plan-feedback" class="ros-plan-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </details>
     </div>
   </section>
 
@@ -476,7 +537,7 @@
 <nav class="tabbar">
   <button class="tab-btn active" data-panel="panel-counter">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    Counter
+    Home
   </button>
   <button class="tab-btn" data-panel="panel-checkin">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/></svg>
@@ -1172,5 +1233,98 @@
 </script>
 <script src="./assets/visits.js" defer></script>
 <script src="./assets/ui.js"></script>
+<script>
+/* Rainbow 1.1 daily home. Reuses existing recovery keys without migration or overwrite. */
+(function () {
+  var planKey = 'ros_recovery_plan_v1';
+  var form = document.getElementById('ros-plan-form');
+  var feedback = document.getElementById('ros-plan-feedback');
+  var summary = document.getElementById('ros-plan-summary');
+  var details = document.getElementById('ros-plan-details');
+  var fields = {
+    signs: document.getElementById('ros-plan-signs'),
+    actions: document.getElementById('ros-plan-actions'),
+    support: document.getElementById('ros-plan-support')
+  };
+  function readPlan() {
+    try {
+      var raw = localStorage.getItem(planKey);
+      if (!raw) return null;
+      var obj = JSON.parse(raw);
+      return obj && typeof obj === 'object' && !Array.isArray(obj) ? obj : null;
+    } catch (err) { return null; }
+  }
+  function renderPlanSummary() {
+    summary.textContent = readPlan()
+      ? 'Plan saved on this device. Open it whenever you want to review or update your next steps.'
+      : 'No plan saved yet. You can create one whenever you feel ready.';
+  }
+  var plan = readPlan();
+  if (plan) {
+    Object.keys(fields).forEach(function (name) {
+      if (typeof plan[name] === 'string') fields[name].value = plan[name];
+    });
+  }
+  renderPlanSummary();
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var value = {
+      signs: fields.signs.value.trim(),
+      actions: fields.actions.value.trim(),
+      support: fields.support.value.trim()
+    };
+    if (!value.signs && !value.actions && !value.support) {
+      feedback.textContent = 'Write at least one thing you would like to remember.';
+      return;
+    }
+    try {
+      localStorage.setItem(planKey, JSON.stringify(value));
+      feedback.textContent = 'Your plan is saved on this device.';
+      renderPlanSummary();
+      details.open = false;
+    } catch (err) {
+      feedback.textContent = 'The plan could not be saved. Your words are still in the form so you can copy them.';
+    }
+  });
+  document.getElementById('ros-plan-delete').addEventListener('click', function () {
+    if (!readPlan()) { feedback.textContent = 'There is no saved plan to delete.'; return; }
+    if (!window.confirm('Delete your saved recovery plan from this device? This cannot be undone.')) return;
+    try {
+      localStorage.removeItem(planKey);
+      form.reset();
+      feedback.textContent = 'Saved plan deleted from this device.';
+      renderPlanSummary();
+    } catch (err) {
+      feedback.textContent = 'Unable to delete the saved plan on this device.';
+    }
+  });
+  document.querySelectorAll('[data-ros-go]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var target = document.querySelector('.tab-btn[data-panel="' + button.getAttribute('data-ros-go') + '"]');
+      if (target) target.click();
+    });
+  });
+  function refreshCheckIn() {
+    var status = document.getElementById('ros-today-status');
+    var today = new Date().toLocaleDateString(undefined, {month:'short', day:'numeric', year:'numeric'});
+    try {
+      var entries = JSON.parse(localStorage.getItem('ros_checkins') || '[]');
+      var checkedIn = Array.isArray(entries) && entries.some(function (entry) { return entry && entry.date === today; });
+      status.textContent = checkedIn
+        ? 'You checked in today. Thank you for making time for yourself.'
+        : 'No check-in saved for today yet. A few words can be enough.';
+    } catch (err) {
+      status.textContent = 'Open your check-ins to review your entries.';
+    }
+  }
+  refreshCheckIn();
+  document.getElementById('save-checkin').addEventListener('click', refreshCheckIn);
+  document.querySelector('.tab-btn[data-panel="panel-counter"]').addEventListener('click', refreshCheckIn);
+  window.addEventListener('storage', function (event) {
+    if (event.key === 'ros_checkins' || event.key === null) refreshCheckIn();
+    if (event.key === planKey || event.key === null) renderPlanSummary();
+  });
+})();
+</script>
 </body>
 </html>
