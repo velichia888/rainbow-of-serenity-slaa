@@ -41,7 +41,7 @@ test('native iOS companion is the launch page, not the public meeting website', 
 });
 
 test('unsigned device workflow has no publishing, signing integration, or auto-trigger', () => {
-  const unsigned = pipeline.split('  ios-device-unsigned:')[1];
+  const unsigned = (pipeline.split('  ios-device-unsigned:')[1] || '').split(/\n  (?=[a-z][a-z0-9-]*:)/)[0];
   assert.ok(unsigned, 'missing unsigned device workflow');
   assert.match(unsigned, /CODE_SIGNING_ALLOWED=NO/);
   assert.match(unsigned, /RainbowOfSerenity-1\.1-unsigned\.ipa/);

@@ -7,7 +7,7 @@ const source = fs.readFileSync('macos/Sources/RainbowMacApp.swift', 'utf8');
 const build = fs.readFileSync('macos/scripts/build-test-app.sh', 'utf8');
 
 test('macOS Codemagic workflow is manual and cannot publish to App Store', () => {
-  const mac = yaml.split('  macos-desktop-test:')[1] || '';
+  const mac = (yaml.split('  macos-desktop-test:')[1] || '').split(/\n  (?=[a-z][a-z0-9-]*:)/)[0];
   assert.match(mac, /name: Rainbow of Serenity - macOS desktop test/);
   assert.match(mac, /feat\/ros-macos-v1-desktop-20261014/);
   assert.match(mac, /bash macos\/scripts\/build-test-app.sh/);
