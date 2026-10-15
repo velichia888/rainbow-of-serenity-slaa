@@ -1,0 +1,42 @@
+name: RainbowOfSerenityMac
+options:
+  minimumXcodeGenVersion: 2.38.0
+  deploymentTarget:
+    macOS: "13.0"
+  generateEmptyDirectories: false
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "13.0"
+targets:
+  RainbowOfSerenityMac:
+    type: application
+    platform: macOS
+    scheme: {}
+    sources:
+      - path: ../Sources/RainbowMacApp.swift
+      - path: Resources/Web
+        type: folder
+        buildPhase: resources
+      - path: Resources/Assets.xcassets
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleDisplayName: Rainbow of Serenity
+        NSPrincipalClass: NSApplication
+        LSApplicationCategoryType: public.app-category.lifestyle
+        NSHighResolutionCapable: true
+    entitlements:
+      path: Resources/Rainbow.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.rainbowofserenity.companion
+        PRODUCT_NAME: Rainbow of Serenity
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "5.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Manual
+        ONLY_ACTIVE_ARCH: "NO"

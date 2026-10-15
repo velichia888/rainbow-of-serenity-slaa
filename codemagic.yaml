@@ -315,3 +315,70 @@ workflows:
 
     artifacts:
       - build/macos/RainbowOfSerenity-macOS-test.zip
+
+  # Manual macOS App Store packaging candidate. No publishing: never upload
+  # until Mac acceptance, review requirements, and user approval.
+  macos-store-candidate:
+    name: Rainbow of Serenity - signed Mac App Store candidate
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: rainbow_companion_asc
+    environment:
+      xcode: latest
+      node: latest
+      groups:
+        - app_store_credentials
+      vars:
+        BUNDLE_ID: "com.rainbowofserenity.companion"
+        APP_STORE_APPLE_ID: "6816620890"
+    scripts:
+      - name: Guard candidate branch and signing prerequisites
+        script: |
+          if [ "$CM_BRANCH" != "feat/ros-macos-appstore-candidate-20261014" ]; then
+            echo "Wrong branch. Select feat/ros-macos-appstore-candidate-20261014." >&2
+            exit 1
+          fi
+          if [ -z "$CERTIFICATE_PRIVATE_KEY" ]; then
+            echo "Codemagic requires CERTIFICATE_PRIVATE_KEY in the app_store_credentials group to request Mac App Store signing files." >&2
+            exit 1
+          fi
+
+      - name: Run source and distribution configuration tests
+        script: |
+          node --test tests/macos-desktop.test.cjs tests/macos-store.test.cjs tests/recovery-home.test.cjs tests/ios-icon.test.cjs
+
+      - name: Generate independent Mac Xcode project
+        script: |
+          bash macos/store/scripts/prepare.sh
+
+      - name: Initialize Mac signing keychain
+        script: |
+          keychain initialize
+
+      - name: Fetch Mac App Store distribution certificate and profile
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --platform MAC_OS --type MAC_APP_STORE --create
+
+      - name: Fetch Mac installer distribution certificate
+        script: |
+          app-store-connect certificates list --type MAC_INSTALLER_DISTRIBUTION --save || \
+            app-store-connect certificates create --type MAC_INSTALLER_DISTRIBUTION --save
+
+      - name: Import Mac signing certificates
+        script: |
+          keychain add-certificates
+
+      - name: Apply Mac App Store provisioning to Xcode target
+        script: |
+          cd macos/store
+          xcode-project use-profiles
+
+      - name: Archive and package signed macOS candidate
+        script: |
+          bash macos/store/scripts/build-and-package.sh
+
+    artifacts:
+      - build/macos-store/RainbowOfSerenity-macOS-AppStore-candidate.pkg
+      - build/macos-store/signed-entitlements.plist
+      - /tmp/xcodebuild_logs/*.log
