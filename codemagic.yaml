@@ -405,14 +405,22 @@ workflows:
         script: |
           keychain initialize
 
-      - name: Fetch Mac App Store distribution certificate and profile
+      - name: Fetch EXISTING Mac App Store signing files (no certificate creation)
         script: |
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --platform MAC_OS --type MAC_APP_STORE --create
+          # Apple's existing team distribution certificate must match CERTIFICATE_PRIVATE_KEY.
+          # Never create or revoke distribution certificates in this workflow.
+          # The strict match excludes unrelated bundle IDs that share our prefix.
+          if ! app-store-connect fetch-signing-files "$BUNDLE_ID" --platform MAC_OS --type MAC_APP_STORE --strict-match-identifier; then
+            echo "No reusable Mac App Store signing pair for the configured private key." >&2
+            echo "Recover the matching existing private key/.p12 and Mac App Store profile. Do not revoke Apple Distribution certificates; the iOS release may depend on them." >&2
+            exit 1
+          fi
 
-      - name: Fetch Mac installer distribution certificate
+      - name: Fetch EXISTING Mac installer distribution certificate (no creation)
         script: |
-          app-store-connect certificates list --type MAC_INSTALLER_DISTRIBUTION --save || \
-            app-store-connect certificates create --type MAC_INSTALLER_DISTRIBUTION --save
+          # An existing Mac Installer certificate must also match the selected key.
+          # Do not turn a missing certificate into an automatic create request.
+          app-store-connect certificates list --type MAC_INSTALLER_DISTRIBUTION --save
 
       - name: Import Mac signing certificates
         script: |

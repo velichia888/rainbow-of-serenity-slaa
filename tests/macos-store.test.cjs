@@ -22,7 +22,9 @@ test('Mac Store candidate cannot auto publish and is protected by branch guard',
   assert.match(c,/feat\/ros-macos-appstore-candidate-20261014/);
   assert.match(c,/CERTIFICATE_PRIVATE_KEY/);
   assert.doesNotMatch(c,/\btriggering:|\bpublishing:|submit_to_app_store:|submit_to_testflight:/);
-  assert.match(c,/fetch-signing-files "\$BUNDLE_ID" --platform MAC_OS --type MAC_APP_STORE --create/);
+  assert.match(c,/fetch-signing-files "\$BUNDLE_ID" --platform MAC_OS --type MAC_APP_STORE --strict-match-identifier/);
+  assert.doesNotMatch(c,/\s--create\b|certificates create|certificates delete|profiles delete/);
+  assert.match(c,/No reusable Mac App Store signing pair/);
   assert.match(c,/MAC_INSTALLER_DISTRIBUTION/);
   assert.match(c,/keychain add-certificates/);
   assert.match(c,/xcode-project use-profiles/);
