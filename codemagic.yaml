@@ -316,6 +316,55 @@ workflows:
     artifacts:
       - build/macos/RainbowOfSerenity-macOS-test.zip
 
+  # Manual native Xcode macOS preflight. No Apple signing or publishing;
+  # verify the independent Xcode target before trying Mac App Store certificates.
+  macos-store-preflight:
+    name: Rainbow of Serenity - macOS Xcode preflight
+    max_build_duration: 90
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      node: latest
+    scripts:
+      - name: Verify dedicated macOS App Store candidate branch
+        script: |
+          if [ "$CM_BRANCH" != "feat/ros-macos-appstore-candidate-20261014" ]; then
+            echo "Select feat/ros-macos-appstore-candidate-20261014." >&2
+            exit 1
+          fi
+
+      - name: Run source and configuration tests
+        script: |
+          node --test tests/macos-desktop.test.cjs tests/macos-store.test.cjs tests/recovery-home.test.cjs tests/ios-icon.test.cjs
+
+      - name: Generate native Mac Xcode project
+        script: |
+          bash macos/store/scripts/prepare.sh
+
+      - name: Build universal macOS app without signing
+        script: |
+          xcodebuild build \
+            -project macos/store/RainbowOfSerenityMac.xcodeproj \
+            -scheme RainbowOfSerenityMac \
+            -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath "$CM_BUILD_DIR/build/macos-store-preflight" \
+            ONLY_ACTIVE_ARCH=NO ARCHS="arm64 x86_64" CODE_SIGNING_ALLOWED=NO
+
+      - name: Inspect and package preflight app
+        script: |
+          APP="$CM_BUILD_DIR/build/macos-store-preflight/Build/Products/Release/Rainbow of Serenity.app"
+          test -d "$APP"
+          test -f "$APP/Contents/Resources/Web/index.html"
+          grep -q 'ros_recovery_plan_v1' "$APP/Contents/Resources/Web/index.html"
+          test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist")" = "com.rainbowofserenity.companion"
+          lipo "$APP/Contents/MacOS/Rainbow of Serenity" -verify_arch arm64 x86_64
+          ditto -c -k --keepParent --sequesterRsrc "$APP" "$CM_BUILD_DIR/RainbowOfSerenity-MacXcode-preflight.zip"
+
+    artifacts:
+      - $CM_BUILD_DIR/RainbowOfSerenity-MacXcode-preflight.zip
+      - /tmp/xcodebuild_logs/*.log
+
   # Manual macOS App Store packaging candidate. No publishing: never upload
   # until Mac acceptance, review requirements, and user approval.
   macos-store-candidate:

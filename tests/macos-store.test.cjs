@@ -7,6 +7,15 @@ const project = fs.readFileSync('macos/store/project.yml','utf8');
 const prepare = fs.readFileSync('macos/store/scripts/prepare.sh','utf8');
 const build = fs.readFileSync('macos/store/scripts/build-and-package.sh','utf8');
 
+test('macOS Xcode preflight compiles without credentials or Apple upload',()=>{
+  const p = yaml.split('  macos-store-preflight:')[1].split('  macos-store-candidate:')[0];
+  assert.match(p,/Rainbow of Serenity - macOS Xcode preflight/);
+  assert.match(p,/CODE_SIGNING_ALLOWED=NO/);
+  assert.match(p,/RainbowOfSerenity-MacXcode-preflight\\.zip/);
+  assert.match(p,/xcodebuild build/);
+  assert.doesNotMatch(p,/\\n    publishing:|\\n    triggering:|fetch-signing-files|keychain add-certificates/);
+});
+
 test('Mac Store candidate cannot auto publish and is protected by branch guard',()=>{
   const c = yaml.split('  macos-store-candidate:')[1] || '';
   assert.match(c,/name: Rainbow of Serenity - signed Mac App Store candidate/);

@@ -34,3 +34,12 @@ Artifact (when it succeeds): `build/macos-store/RainbowOfSerenity-macOS-AppStore
 - This workflow requires Codemagic/Apple signing credentials and an existing macOS App Store Connect platform.
 - XcodeGen installed by Homebrew if unavailable. First CI run will validate compiler, signing, and package compatibility.
 - Existing Mac developer test ZIP remains available and should be used for direct Mac acceptance before public submission.
+
+## No-signing Mac Xcode preflight (run this first)
+Branch: `feat/ros-macos-appstore-candidate-20261014`
+Workflow: **Rainbow of Serenity - macOS Xcode preflight**
+Artifact: `RainbowOfSerenity-MacXcode-preflight.zip`
+
+This manual workflow generates the native Xcode target, compiles a universal unsigned desktop app, and checks the bundled Rainbow recovery assets and bundle ID. It does not use signing credentials, create certificates, publish to Apple, or submit for review. The ZIP is a compiler-test artifact; use the previously successful ad-hoc-signed Mac test ZIP for direct desktop acceptance.
+
+Only move on to the signed Mac App Store candidate after this preflight passes and the macOS platform and Mac-specific signing files are configured.
