@@ -22,8 +22,8 @@ Scope: development only. **No Firebase deployment, Codemagic job, merge, TestFli
 - Never use real private recovery notes when testing. Local recovery records have no app-managed backup or encryption. Do not uninstall the only copy to troubleshoot icon caching or storage.
 
 ## Required qualification before release
-### Backend authorization — **not yet run**
-Use Firebase Emulator Suite, not production, to validate:
+### Backend authorization — **17/17 emulator cases passed (2026-10-22)**
+The independent allow/deny tests cover the primary workflows below. Additional boundary cases and real service operational tests remain release gates:
 - Unauthenticated user cannot create posts or reports; anonymous user can atomically create pending post plus rate record and cannot directly create public feed items.
 - A normal member cannot read or delete another person's pending posts, read/list reports, approve/reject content, or claim moderator privileges.
 - Rate limit and field/length/email/link restrictions reject invalid posts.
@@ -32,8 +32,8 @@ Use Firebase Emulator Suite, not production, to validate:
 - Moderator can remove a reported post, mark a report removed/dismissed, and non-moderators cannot modify report status.
 - Re-check original anonymous visitor totals, direct-feed moderator deletion, and Firebase moderation sign-in. Test network interruptions and retries.
 
-### Source qualification — **static inspection performed only**
-A JavaScript parse and parity/sanity checks were performed against GitHub files. **Node test suite, Firebase emulator, Codemagic compiler, signed IPA and device acceptance have not yet been executed.** The unsigned workflow is wired to run three source test files.
+### Source qualification — **13/13 Node source tests passed (2026-10-22)**
+A clean isolated homeserver checkout of this development branch passed `node --test tests/recovery-home.test.cjs tests/ios-icon.test.cjs tests/community-safety.test.cjs` (13/13). The separate Java 21 + Firebase Emulator Suite executed `tests/firebase/rules.test.cjs` against the `demo-rainbow-ios-qualify` project (17/17 allow/deny cases). No production backend or real recovery data was involved. A dedicated GitHub Actions workflow `.github/workflows/ros-ios-qualification.yml` reruns both suites on changes to this branch. **Codemagic compiler, signed IPA, live backend deployment and device acceptance remain untested.**
 
 ### iPhone acceptance — **not yet run on this branch**
 - Home must say “Your recovery, your pace,” with existing dates/chips/check-ins/gratitude intact.
