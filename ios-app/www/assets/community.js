@@ -26,6 +26,8 @@
   var visitsEl = document.getElementById('feed-visits');
   var hiddenStatus = document.getElementById('feed-hidden-status');
   var restoreBtn = document.getElementById('feed-restore-hidden');
+  var pendingPanel = document.getElementById('feed-pending');
+  var pendingList = document.getElementById('feed-pending-list');
   var reportsPanel = document.getElementById('feed-reports');
   var reportsList = document.getElementById('feed-report-list');
   var guidelines = document.getElementById('feed-guidelines');
@@ -87,7 +89,7 @@
     countEl.textContent = textEl.value.length + ' / 500';
   });
   if(guidelines){
-    guidelines.textContent = 'Please share only your own recovery experience. No harassment, threats, identifying details, links or spam. Posts are visible to the community. Report harmful posts and block member accounts on this device. Moderators may remove posts; harmful or urgent situations should be reported to the appropriate local services.';
+    guidelines.textContent = 'Please share only your own recovery experience. No harassment, threats, identifying details, links or spam. New posts are private until moderator approval. Report harmful posts and block member accounts on this device. Moderators may remove posts; harmful or urgent situations should be reported to the appropriate local services.';
   }
 
   if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
@@ -113,8 +115,8 @@
     if(!started) start().catch(startFailed);
   });
 
-  var started = false, latest = [], isMod = false, db, auth, fs, authMod, feed, reports;
-  var stopReports = null;
+  var started = false, latest = [], isMod = false, db, auth, fs, authMod, feed, reports, pendingFeed;
+  var stopReports = null, stopPending = null;
   var lastPostAt = 0;
   function startFailed(error){
     console.error(error);
@@ -238,6 +240,58 @@
       reportsList.appendChild(row);
     });
   }
+  function drawPending(snap){
+    pendingList.replaceChildren();
+    if(snap.empty){
+      pendingList.appendChild(paragraph('No posts waiting for approval.'));
+      return;
+    }
+    snap.docs.forEach(function(item){
+      var draft = item.data();
+      var row = document.createElement('article');
+      row.className = 'feed-report-item';
+      row.appendChild(paragraph(draft.name || 'Anonymous', 'feed-name'));
+      row.appendChild(paragraph(draft.text || '', 'feed-text'));
+      var actions = document.createElement('div');
+      actions.className = 'feed-actions';
+      actions.appendChild(button('Approve and publish', async function(){
+        if(!confirm('Publish this message for everyone to see?')) return;
+        try{
+          // Atomic publication prevents lost drafts if approval fails.
+          var batch = fs.writeBatch(db);
+          batch.set(fs.doc(feed), {
+            name: draft.name, text: draft.text, uid: draft.uid,
+            createdAt: fs.serverTimestamp()
+          });
+          batch.delete(fs.doc(pendingFeed, item.id));
+          await batch.commit();
+        }catch(error){
+          console.error(error);
+          status('Approval failed. The pending post has been kept for review.', true);
+        }
+      }));
+      actions.appendChild(button('Reject post', async function(){
+        if(!confirm('Reject and delete this unpublished message?')) return;
+        try { await fs.deleteDoc(fs.doc(pendingFeed, item.id)); }
+        catch(error){ console.error(error); status('Unable to reject this post.', true); }
+      }));
+      row.appendChild(actions);
+      pendingList.appendChild(row);
+    });
+  }
+  function watchPending(){
+    if(stopPending){ stopPending(); stopPending = null; }
+    pendingPanel.hidden = !isMod;
+    if(!isMod) return;
+    stopPending = fs.onSnapshot(
+      fs.query(pendingFeed, fs.orderBy('createdAt','desc'), fs.limit(50)),
+      drawPending,
+      function(error){
+        console.error(error);
+        pendingList.replaceChildren(paragraph('Pending posts could not be loaded.'));
+      }
+    );
+  }
   function watchReports(){
     if(stopReports){ stopReports(); stopReports = null; }
     reportsPanel.hidden = !isMod;
@@ -285,6 +339,7 @@
       auth = authMod.getAuth(app);
       feed = fs.collection(db, 'feed');
       reports = fs.collection(db, 'reports');
+      pendingFeed = fs.collection(db, 'pendingFeed');
     }catch(error){
       started = false;
       throw error;
@@ -299,6 +354,7 @@
       modBtn.textContent = user.isAnonymous ? 'Moderator sign-in' : 'Sign out';
       showModLink();
       watchReports();
+      watchPending();
       showVisits();
       redraw();
     });
@@ -348,13 +404,13 @@
     status('Posting…');
     try{
       var batch = fs.writeBatch(db);
-      batch.set(fs.doc(feed), {name:name || 'Anonymous', text:message, uid:user.uid, createdAt:fs.serverTimestamp()});
+      batch.set(fs.doc(pendingFeed), {name:name || 'Anonymous', text:message, uid:user.uid, createdAt:fs.serverTimestamp()});
       batch.set(fs.doc(db, 'rate', user.uid), {last:fs.serverTimestamp()});
       await batch.commit();
       lastPostAt = Date.now();
       try { localStorage.setItem('ros_feed_name', name); } catch(e) {}
       textEl.value = ''; countEl.textContent = '0 / 500';
-      status('Posted.');
+      status('Sent for moderator review. It will appear publicly only after approval.');
     }catch(error){
       console.error(error);
       status('Post not sent. Check the community rules and try again shortly.', true);
