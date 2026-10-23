@@ -29,6 +29,9 @@ service cloud.firestore {
         && request.resource.data.text.size() <= 500
         && !request.resource.data.text.lower().matches('(?s).*(https?://|www[.]).*')
         && !request.resource.data.name.lower().matches('(?s).*(https?://|www[.]).*')
+        // Reject obvious contact information before it becomes visible publicly.
+        && !request.resource.data.text.lower().matches('(?s).*[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}.*')
+        && !request.resource.data.name.lower().matches('(?s).*[a-z0-9._%+-]+@[a-z0-9.-]+[.][a-z]{2,}.*')
         && request.resource.data.createdAt == request.time
         // The same write must record this post time for the device...
         && getAfter(ratePath()).data.last == request.time
@@ -56,6 +59,35 @@ service cloud.firestore {
         && request.resource.data.n == 1;
       allow update: if request.resource.data.keys().hasOnly(['n'])
         && request.resource.data.n == resource.data.n + 1;
+    }
+
+    // Private reporting: users can flag a visible post exactly once per auth UID.
+    // Other community members cannot list or read reports.
+    // Reports are moderated manually; there is no public moderation data.
+    match /reports/{reportId} {
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['postId', 'reporterUid', 'reason', 'status', 'createdAt'])
+        && request.resource.data.postId is string
+        && request.resource.data.postId.matches('^[A-Za-z0-9]{20}
+      allow read, write: if false;
+    }
+  }
+}
+)
+        && reportId == request.auth.uid + '_' + request.resource.data.postId
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.reason in ['Harassment', 'Personal information', 'Spam', 'Other']
+        && request.resource.data.status == 'open'
+        && request.resource.data.createdAt == request.time
+        && exists(/databases/$(database)/documents/feed/$(request.resource.data.postId))
+        && get(/databases/$(database)/documents/feed/$(request.resource.data.postId)).data.uid != request.auth.uid;
+      allow read: if isModerator();
+      allow update: if isModerator()
+        && resource.data.status == 'open'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','reviewedAt'])
+        && request.resource.data.status in ['removed','dismissed']
+        && request.resource.data.reviewedAt == request.time;
+      allow delete: if isModerator();
     }
 
     match /{document=**} {
