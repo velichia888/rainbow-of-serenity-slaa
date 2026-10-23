@@ -1,0 +1,33 @@
+name: Rainbow iOS source and Firebase qualification
+on:
+  push:
+    branches:
+      - dev/ros-ios-community-safety-20261022
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios-qualification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run recovery, icon and safety source tests
+        run: node --test tests/recovery-home.test.cjs tests/ios-icon.test.cjs tests/community-safety.test.cjs
+      - name: Set up emulator Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install isolated Firebase test dependencies
+        run: npm install --no-audit --no-fund
+        working-directory: tests/firebase
+      - name: Run Firestore authorization emulator tests
+        run: npm run test:rules
+        working-directory: tests/firebase
