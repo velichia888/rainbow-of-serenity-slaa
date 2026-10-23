@@ -39,6 +39,10 @@ workflows:
         script: |
           npm install
 
+      - name: Qualify recovery and community safety source
+        script: |
+          node --test tests/recovery-home.test.cjs tests/ios-icon.test.cjs tests/community-safety.test.cjs
+
       - name: Add iOS platform (first run only)
         script: |
           if [ ! -d "ios" ]; then
@@ -142,6 +146,10 @@ workflows:
       - name: Install dependencies
         script: |
           npm install
+
+      - name: Qualify recovery and community safety source
+        script: |
+          node --test tests/recovery-home.test.cjs tests/ios-icon.test.cjs tests/community-safety.test.cjs
 
       - name: Generate iOS project
         script: |
