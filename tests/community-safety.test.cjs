@@ -78,3 +78,20 @@ test('community safety changes leave local recovery key compatibility intact', (
     assert.ok(app.includes(key), 'Recovery key missing: ' + key);
   }
 });
+
+test('new Community posts remain private until a moderator approves them', () => {
+  const publicFeedRule = rules.split('match /feed/{postId} {')[1].split('match /pendingFeed/{pendingId}')[0];
+  const pendingRule = rules.split('match /pendingFeed/{pendingId} {')[1].split('match /rate/{uid}')[0];
+  assert.match(publicFeedRule, /allow create: if isModerator\(\)/);
+  assert.doesNotMatch(publicFeedRule, /allow create: if request\.auth != null/);
+  assert.match(pendingRule, /allow create: if request\.auth != null/);
+  assert.match(pendingRule, /allow read, delete: if isModerator\(\);/);
+  assert.match(iosModule, /batch\.set\(fs\.doc\(pendingFeed\)/);
+  assert.match(iosModule, /status\('Sent for moderator review/);
+  assert.match(iosModule, /batch\.delete\(fs\.doc\(pendingFeed, item\.id\)\)/);
+  assert.match(iosModule, /Approve and publish/);
+  for(const html of [app, website]){
+    assert.match(html, /id="feed-pending"/);
+    assert.match(html, /id="feed-pending-list"/);
+  }
+});
