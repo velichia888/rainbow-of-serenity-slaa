@@ -341,6 +341,17 @@
   .ros-home-plan textarea:focus-visible,.ros-home-plan summary:focus-visible,.ros-home-actions button:focus-visible{outline:3px solid var(--teal);outline-offset:2px;}
   .ros-plan-buttons{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;}
   .ros-plan-feedback{min-height:1.4em;font-size:.88rem;margin:10px 0 0;}
+
+  /* Member moderation controls, accessible on the web and in the iOS companion. */
+  .feed-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .feed-action{border:1px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--bg-raised);color:var(--ink);font:inherit;font-size:.82rem;cursor:pointer}
+  .feed-action:focus-visible,.feed-report-form select:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+  .feed-report-form,.feed-report-item{margin-top:12px;border:1px solid var(--line);padding:12px;border-radius:8px;background:var(--card)}
+  .feed-report-form select{display:block;max-width:100%;padding:8px;margin:6px 0 10px;border:1px solid var(--line);background:var(--bg-raised);color:var(--ink)}
+  .feed-report-result{font-size:.85rem;margin:8px 0 0}
+  .feed-guidelines,.feed-privacy{font-size:.86rem;line-height:1.5;color:var(--ink-soft)}
+  .feed-report-item .feed-text{white-space:pre-wrap;overflow-wrap:anywhere}
+  .feed-hidden-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:10px 0}
 </style>
 <link rel="stylesheet" href="./assets/ui.css">
 </head>
@@ -514,6 +525,13 @@
       <p style="margin:0;">The community feed isn't switched on yet. In the meantime, reach the group directly:</p>
       <p style="margin-top:12px;"><a href="mailto:rainbowofserenityslaa@gmail.com">rainbowofserenityslaa@gmail.com</a></p>
     </div>
+
+    <p id="feed-guidelines" class="feed-guidelines">Please share responsibly. No harassment, threats, identifying details, links or spam.</p>
+    <p class="feed-privacy">Only moderator-approved posts become visible to other members. Private check-ins and recovery plans are not posted.</p>
+    <div class="feed-hidden-tools">
+      <span id="feed-hidden-status" role="status" aria-live="polite"></span>
+      <button type="button" id="feed-restore-hidden" class="feed-action" hidden>Unblock all member accounts</button>
+    </div>
     <div class="card" id="feed-compose">
       <label for="feed-name">Name (first name or initial)</label>
       <input type="text" id="feed-name" maxlength="30" placeholder="Anonymous" autocomplete="off">
@@ -528,11 +546,22 @@
     <div class="card" id="feed-list" aria-live="polite">
       <p class="empty-note">Loading the feed…</p>
     </div>
+    <div class="card" id="feed-pending" hidden aria-label="Private moderator approval queue">
+      <h3>Posts awaiting approval (moderators only)</h3>
+      <p class="feed-guidelines">Read each message before publishing it to Community. Reject abusive content and identifying information.</p>
+      <div id="feed-pending-list" role="status"><p class="empty-note">Loading pending posts…</p></div>
+    </div>
+    <div class="card" id="feed-reports" hidden aria-label="Private moderator reports">
+      <h3>Reports awaiting review (moderators only)</h3>
+      <p class="feed-guidelines">Review reports promptly. Removing a post deletes it from the community for everyone.</p>
+      <div id="feed-report-list" role="status"><p class="empty-note">Loading reports…</p></div>
+    </div>
     <p class="feed-mod" id="feed-mod" hidden><span id="feed-mod-label"></span> <button type="button" id="feed-mod-btn">Moderator sign-in</button></p>
     <p class="feed-mod" id="feed-visits" hidden></p>
   </section>
 
 </main>
+<p class="feed-privacy" style="text-align:center;margin:12px auto 95px"><a href="./privacy.html">Privacy policy</a> · <a href="mailto:rainbowofserenityslaa@gmail.com">Contact the community moderators</a></p>
 
 <nav class="tabbar">
   <button class="tab-btn active" data-panel="panel-counter">
@@ -971,266 +1000,7 @@
     }
   })();
 </script>
-<script type="module">
-  // Community feed, stored live in Firebase Firestore.
-  // Firebase web config (see docs/feed-setup.md). It is public by design; firestore.rules protects the data.
-  var firebaseConfig = {
-    apiKey: "AIzaSyDfr0qFYvjf17HIecXbw_ynqv2t6QGyayY",
-    authDomain: "rainbow-of-serenity.firebaseapp.com",
-    projectId: "rainbow-of-serenity",
-    appId: "1:55750031473:web:5e5033844f8c69a9c243d0"
-  };
-
-  // Google accounts allowed to remove posts. Keep in sync with firestore.rules.
-  var MODERATORS = ['goodmanona@gmail.com', 'rainbowofserenityslaa@gmail.com'];
-  var MAX_POSTS = 50;
-  var POST_GAP_MS = 30000;
-  var LINK_RE = /(https?:\/\/|www\.)/i;
-  var nameEl = document.getElementById('feed-name');
-  var textEl = document.getElementById('feed-text');
-  var countEl = document.getElementById('feed-count');
-  var postBtn = document.getElementById('feed-post');
-  var statusEl = document.getElementById('feed-status');
-  var listEl = document.getElementById('feed-list');
-  var modEl = document.getElementById('feed-mod');
-  var modLabelEl = document.getElementById('feed-mod-label');
-  var modBtn = document.getElementById('feed-mod-btn');
-  var visitsEl = document.getElementById('feed-visits');
-
-  function setStatus(msg, isError){
-    statusEl.textContent = msg || '';
-    statusEl.classList.toggle('error', !!isError);
-  }
-
-  function timeAgo(date){
-    if(!date) return 'just now';
-    var secs = Math.floor((Date.now() - date.getTime()) / 1000);
-    if(secs < 60) return 'just now';
-    var mins = Math.floor(secs / 60);
-    if(mins < 60) return mins + 'm ago';
-    var hours = Math.floor(mins / 60);
-    if(hours < 24) return hours + 'h ago';
-    var days = Math.floor(hours / 24);
-    if(days < 7) return days + 'd ago';
-    return date.toLocaleDateString(undefined, {month:'short', day:'numeric'});
-  }
-
-  function renderPosts(posts, onRemove){
-    listEl.innerHTML = '';
-    if(posts.length === 0){
-      listEl.innerHTML = '<p class="empty-note">No posts yet. Yours can be the first.</p>';
-      return;
-    }
-    posts.forEach(function(p){
-      var row = document.createElement('div');
-      row.className = 'feed-post';
-      if(onRemove){
-        var remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'feed-remove';
-        remove.textContent = 'Remove';
-        remove.addEventListener('click', function(){ onRemove(p); });
-        row.appendChild(remove);
-      }
-      var name = document.createElement('span');
-      name.className = 'feed-name';
-      name.textContent = p.name || 'Anonymous';
-      var time = document.createElement('span');
-      time.className = 'feed-time';
-      time.textContent = timeAgo(p.createdAt);
-      var text = document.createElement('p');
-      text.className = 'feed-text';
-      text.textContent = p.text;
-      row.appendChild(name);
-      row.appendChild(time);
-      row.appendChild(text);
-      listEl.appendChild(row);
-    });
-  }
-
-  try{
-    var savedName = localStorage.getItem('ros_feed_name');
-    if(savedName) nameEl.value = savedName;
-  }catch(e){}
-
-  textEl.addEventListener('input', function(){
-    countEl.textContent = textEl.value.length + ' / 500';
-  });
-
-  if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
-    document.getElementById('feed-setup').hidden = false;
-    document.getElementById('feed-compose').hidden = true;
-    listEl.hidden = true;
-  } else {
-    var offlineEl = document.getElementById('feed-offline');
-    var composeEl = document.getElementById('feed-compose');
-    var started = false;
-    function tryStart(){
-      if(started) return;
-      if(!navigator.onLine){
-        offlineEl.hidden = false;
-        composeEl.hidden = true;
-        listEl.innerHTML = '<p class="empty-note">The feed will appear here when you\'re back online.</p>';
-        return;
-      }
-      offlineEl.hidden = true;
-      composeEl.hidden = false;
-      started = true;
-      listEl.innerHTML = '<p class="empty-note">Loading the feed…</p>';
-      start().catch(function(err){
-        console.error(err);
-        started = false;
-        listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load. Check your connection and try again.</p>';
-      });
-    }
-    window.addEventListener('online', tryStart);
-    window.addEventListener('offline', function(){ offlineEl.hidden = false; });
-    window.addEventListener('online', function(){ offlineEl.hidden = true; });
-    tryStart();
-  }
-
-  async function start(){
-    var sdk = 'https://www.gstatic.com/firebasejs/10.12.2/';
-    var appMod = await import(sdk + 'firebase-app.js');
-    var fs = await import(sdk + 'firebase-firestore.js');
-    var authMod = await import(sdk + 'firebase-auth.js');
-    var app = appMod.initializeApp(firebaseConfig);
-    var db = fs.getFirestore(app);
-    var auth = authMod.getAuth(app);
-    var feed = fs.collection(db, 'feed');
-    var latest = [];
-    var isMod = false;
-
-    function redraw(){ renderPosts(latest, isMod ? removePost : null); }
-
-    async function removePost(p){
-      if(!confirm('Remove this post for everyone?')) return;
-      try{
-        await fs.deleteDoc(fs.doc(db, 'feed', p.id));
-      }catch(err){
-        console.error(err);
-        alert('That post couldn\'t be removed. Please try again.');
-      }
-    }
-
-    // Every visitor gets an invisible anonymous sign-in, so the rules can
-    // limit how often each device posts. Nobody has to make an account.
-    authMod.onAuthStateChanged(auth, function(user){
-      if(!user){
-        authMod.signInAnonymously(auth).catch(function(err){ console.error(err); });
-        return;
-      }
-      isMod = !user.isAnonymous && MODERATORS.indexOf(user.email) !== -1;
-      modLabelEl.textContent = user.isAnonymous ? '' : 'Signed in as ' + user.email + (isMod ? '' : ' (not a moderator)') + '.';
-      modBtn.textContent = user.isAnonymous ? 'Moderator sign-in' : 'Sign out';
-      redraw();
-      showVisits();
-    });
-
-    // Moderators see the anonymous visitor count (see assets/visits.js).
-    async function showVisits(){
-      visitsEl.hidden = true;
-      if(!isMod) return;
-      try{
-        var snap = await fs.getDocs(fs.query(fs.collection(db, 'visits'), fs.orderBy(fs.documentId(), 'desc'), fs.limit(30)));
-        var todayId = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Phoenix', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date());
-        var today = 0, week = 0, month = 0;
-        snap.docs.forEach(function(d){
-          var n = d.data().n || 0;
-          var age = (Date.parse(todayId) - Date.parse(d.id)) / 86400000;
-          if(age < 1) today += n;
-          if(age < 7) week += n;
-          if(age < 30) month += n;
-        });
-        visitsEl.textContent = 'Visitors today: ' + today + ' · last 7 days: ' + week + ' · last 30 days: ' + month + ' (each device counted once a day)';
-        visitsEl.hidden = false;
-      }catch(err){ console.error(err); }
-    }
-
-    // The moderator link only shows when the page is opened with #moderate,
-    // so regular members don't see it.
-    function showModLink(){ modEl.hidden = !(location.hash === '#moderate' || isMod); }
-    window.addEventListener('hashchange', showModLink);
-    showModLink();
-
-    modBtn.addEventListener('click', async function(){
-      try{
-        if(auth.currentUser && !auth.currentUser.isAnonymous){
-          await authMod.signOut(auth);
-        } else {
-          await authMod.signInWithPopup(auth, new authMod.GoogleAuthProvider());
-        }
-        showModLink();
-      }catch(err){
-        console.error(err);
-        alert('Sign-in didn\'t work. Please try again.');
-      }
-    });
-
-    fs.onSnapshot(
-      fs.query(feed, fs.orderBy('createdAt', 'desc'), fs.limit(MAX_POSTS)),
-      function(snap){
-        latest = snap.docs.map(function(d){
-          var data = d.data({serverTimestamps:'estimate'});
-          return {
-            id: d.id,
-            name: data.name,
-            text: data.text,
-            createdAt: data.createdAt ? data.createdAt.toDate() : null
-          };
-        });
-        redraw();
-      },
-      function(err){
-        console.error(err);
-        listEl.innerHTML = '<p class="empty-note">The feed couldn\'t load right now. Please try again later.</p>';
-      }
-    );
-
-    // Keep the "5m ago" labels fresh without reloading.
-    setInterval(function(){ if(latest.length) redraw(); }, 60000);
-
-    var lastPostAt = 0;
-    postBtn.addEventListener('click', async function(){
-      var text = textEl.value.trim();
-      var name = nameEl.value.trim().slice(0, 30);
-      if(!text){ setStatus('Write something first.', true); return; }
-      if(text.length > 500){ setStatus('Please keep posts under 500 characters.', true); return; }
-      if(LINK_RE.test(text) || LINK_RE.test(name)){ setStatus('Links aren\'t allowed in the feed, to keep out spam.', true); return; }
-      if(Date.now() - lastPostAt < POST_GAP_MS){ setStatus('Please wait 30 seconds between posts.', true); return; }
-      var user = auth.currentUser;
-      if(!user){ setStatus('Still connecting. Try again in a moment.', true); return; }
-
-      postBtn.disabled = true;
-      setStatus('Posting…');
-      try{
-        // The post and this device's "last posted" time are saved together,
-        // and the rules reject the pair if the last post was under 30s ago.
-        var batch = fs.writeBatch(db);
-        batch.set(fs.doc(feed), {
-          name: name || 'Anonymous',
-          text: text,
-          uid: user.uid,
-          createdAt: fs.serverTimestamp()
-        });
-        batch.set(fs.doc(db, 'rate', user.uid), {last: fs.serverTimestamp()});
-        await batch.commit();
-        lastPostAt = Date.now();
-        try{ localStorage.setItem('ros_feed_name', name); }catch(e){}
-        textEl.value = '';
-        countEl.textContent = '0 / 500';
-        setStatus('Posted.');
-      }catch(err){
-        console.error(err);
-        setStatus(err && err.code === 'permission-denied'
-          ? 'That didn\'t go through. Please wait 30 seconds and try again.'
-          : 'That didn\'t go through. Please try again.', true);
-      }finally{
-        postBtn.disabled = false;
-      }
-    });
-  }
-</script>
+<script type="module" src="./assets/community.js"></script>
 <script src="./assets/visits.js" defer></script>
 <script src="./assets/ui.js"></script>
 <script>
