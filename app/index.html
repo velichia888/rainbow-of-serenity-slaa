@@ -527,7 +527,7 @@
     </div>
 
     <p id="feed-guidelines" class="feed-guidelines">Please share responsibly. No harassment, threats, identifying details, links or spam.</p>
-    <p class="feed-privacy">The Community feed is visible to other members. Private check-ins and recovery plans are not posted.</p>
+    <p class="feed-privacy">Only moderator-approved posts become visible to other members. Private check-ins and recovery plans are not posted.</p>
     <div class="feed-hidden-tools">
       <span id="feed-hidden-status" role="status" aria-live="polite"></span>
       <button type="button" id="feed-restore-hidden" class="feed-action" hidden>Unblock all member accounts</button>
@@ -545,6 +545,11 @@
     </div>
     <div class="card" id="feed-list" aria-live="polite">
       <p class="empty-note">Loading the feed…</p>
+    </div>
+    <div class="card" id="feed-pending" hidden aria-label="Private moderator approval queue">
+      <h3>Posts awaiting approval (moderators only)</h3>
+      <p class="feed-guidelines">Read each message before publishing it to Community. Reject abusive content and identifying information.</p>
+      <div id="feed-pending-list" role="status"><p class="empty-note">Loading pending posts…</p></div>
     </div>
     <div class="card" id="feed-reports" hidden aria-label="Private moderator reports">
       <h3>Reports awaiting review (moderators only)</h3>
