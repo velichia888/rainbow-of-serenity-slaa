@@ -48,7 +48,7 @@
   }
   function showHiddenCount(){
     var count = hiddenUids.length;
-    hiddenStatus.textContent = count ? count + ' member account(s) hidden on this device.' : '';
+    hiddenStatus.textContent = count ? count + ' member account(s) blocked on this device.' : '';
     restoreBtn.hidden = !count;
   }
   function timeAgo(date){
@@ -87,7 +87,7 @@
     countEl.textContent = textEl.value.length + ' / 500';
   });
   if(guidelines){
-    guidelines.textContent = 'Please share only your own recovery experience. No harassment, threats, identifying details, links or spam. Posts are visible to the community. You can report a post or hide a member account. Moderators may remove posts; harmful or urgent situations should be reported to the appropriate local services.';
+    guidelines.textContent = 'Please share only your own recovery experience. No harassment, threats, identifying details, links or spam. Posts are visible to the community. Report harmful posts and block member accounts on this device. Moderators may remove posts; harmful or urgent situations should be reported to the appropriate local services.';
   }
 
   if(!firebaseConfig.apiKey || !firebaseConfig.projectId){
@@ -126,7 +126,7 @@
     listEl.replaceChildren();
     var visible = latest.filter(function(post){ return !post.uid || !hiddenUids.includes(post.uid); });
     if(visible.length === 0){
-      listEl.appendChild(paragraph(latest.length ? 'You have hidden the posts shown here.' : 'No posts yet. Yours can be the first.'));
+      listEl.appendChild(paragraph(latest.length ? 'Posts from blocked accounts are hidden here.' : 'No posts yet. Yours can be the first.'));
       return;
     }
     visible.forEach(function(post){
@@ -146,10 +146,10 @@
         }));
       }
       if(post.uid && (!auth.currentUser || post.uid !== auth.currentUser.uid)){
-        controls.appendChild(button('Hide member', function(){
+        controls.appendChild(button('Block member', function(){
           if(!hiddenUids.includes(post.uid)){
             hiddenUids.push(post.uid);
-            if(!persistHidden()) status('Posts hidden for this session, but local storage is unavailable.', true);
+            if(!persistHidden()) status('Posts blocked for this session, but local storage is unavailable.', true);
           }
           showHiddenCount();
           redraw();
