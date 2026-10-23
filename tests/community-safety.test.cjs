@@ -27,7 +27,7 @@ test('community safety module ships in both builds without duplicate inline lega
 
 test('member controls safely render text, report abuse, and persist local hidden accounts', () => {
   for (const phrase of [
-    "textContent = post.text || ''",
+    "paragraph(post.text || '', 'feed-text')",
     "localStorage.setItem(BLOCK_KEY",
     "hiddenUids.includes(post.uid)",
     "Send report",
